@@ -1,0 +1,2774 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SocialX — 3D Realtime Social & Earning Platform</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: '#1877F2',
+            'brand-hover': '#166FE5',
+            'brand-dark': '#0E5AC2',
+            'lite-bg': '#F0F2F7',
+            'lite-card': '#FFFFFF',
+            'lite-text': '#0B0D12',
+            'lite-muted': '#5D6778',
+            'lite-border': '#D8DDE6',
+            'dark-bg': '#0D0E12',
+            'dark-card': '#181A20',
+            'dark-text': '#E8ECF2',
+            'dark-muted': '#969EAE',
+            'dark-border': '#292D38'
+          },
+          boxShadow: {
+            '3d-sm': '0 2px 0 rgba(0,0,0,0.05), 0 3px 6px -2px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.7)',
+            '3d-card': '0 6px 18px -4px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255,255,255,0.9)',
+            '3d-btn': '0 3px 0 #0E5AC2, 0 4px 10px rgba(24,119,242,0.3), inset 0 1px 0 rgba(255,255,255,0.35)',
+            '3d-btn-gray': '0 2.5px 0 #cbd5e1, 0 3px 6px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)',
+            '3d-gold-card': '0 12px 28px -6px rgba(234,179,8,0.4), inset 0 1px 0 rgba(255,255,255,0.6)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Ads Scripts -->
+  <script src='//libtl.com/sdk.js' data-zone='9955574' data-sdk='show_9955574'></script>
+  <script src="https://ad.gigapub.tech/script?id=6234"></script>
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+  <style>
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .btn-3d {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-3d:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(12px) scale(0.92); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .reaction-popover {
+      animation: floatUp 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+
+<body class="bg-lite-bg dark:bg-dark-bg text-lite-text dark:text-dark-text font-sans antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ============================================================ -->
+  <!-- 0. REAL AUTHENTICATION VIEW                                  -->
+  <!-- ============================================================ -->
+  <div id="auth-screen" class="fixed inset-0 z-50 bg-gradient-to-b from-[#004747] via-[#003838] to-[#011e1e] flex flex-col items-center justify-between p-4 sm:p-6 overflow-y-auto">
+    <div class="w-full flex-1 flex flex-col items-center justify-center my-auto max-w-sm">
+      
+      <div class="bg-white text-lite-text w-full rounded-[38px] p-6 sm:p-7 shadow-2xl space-y-4">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#005353] to-[#008080] flex items-center justify-center mx-auto shadow-md">
+          <span class="text-white text-3xl font-black select-none leading-none">✱</span>
+        </div>
+
+        <div class="text-center space-y-1">
+          <h2 id="auth-title" class="text-2xl font-black text-[#0B0D12]">Sign In</h2>
+          <p id="auth-subtitle" class="text-[12px] text-lite-muted leading-tight px-3">
+            To sign in to an account in the application, enter your email and password
+          </p>
+        </div>
+
+        <form id="auth-form" class="space-y-3 pt-1" onsubmit="event.preventDefault(); handleRealAuthSubmit();">
+          <div id="auth-name-group" class="hidden space-y-1">
+            <label class="text-xs font-bold text-lite-text">Full Name</label>
+            <input type="text" id="auth-name" placeholder="Enter your full name" class="w-full text-xs px-4 py-3 rounded-2xl bg-[#ECEEF2] border-none outline-none text-lite-text shadow-inner" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-lite-text">Email</label>
+            <input type="email" id="auth-email" required placeholder="user@example.com" class="w-full text-xs px-4 py-3 rounded-2xl bg-[#ECEEF2] border-none outline-none text-lite-text shadow-inner" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-lite-text">Password</label>
+            <div class="relative flex items-center">
+              <input type="password" id="auth-password" required placeholder="••••••••" class="w-full text-xs px-4 py-3 rounded-2xl bg-[#ECEEF2] border-none outline-none text-lite-text shadow-inner pr-10" />
+              <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 text-lite-muted hover:text-lite-text">
+                <i data-lucide="eye" id="auth-eye-icon" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="auth-forgot-link" class="text-right pt-0.5">
+            <a href="#" onclick="handleForgotPassword()" class="text-xs font-semibold text-brand hover:underline">Forgot password?</a>
+          </div>
+
+          <button type="submit" id="auth-submit-btn" class="btn-3d w-full py-3 bg-[#005353] hover:bg-[#004444] text-white font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2 mt-2">
+            <span id="auth-btn-text">Sign In</span>
+            <span class="text-base font-bold">⟶</span>
+          </button>
+        </form>
+
+        <div class="flex items-center gap-3 py-1">
+          <div class="flex-1 h-[1px] bg-lite-border"></div>
+          <span class="text-xs text-lite-muted font-medium">or</span>
+          <div class="flex-1 h-[1px] bg-lite-border"></div>
+        </div>
+
+        <div class="text-center pt-2 text-xs text-lite-muted font-medium">
+          <span id="auth-switch-text">Dont have an account yet?</span>
+          <button type="button" onclick="toggleAuthMode()" id="auth-switch-btn" class="text-brand font-bold underline ml-1">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 1. MAIN APP TOP HEADER                                       -->
+  <!-- ============================================================ -->
+  <header id="main-app-header" class="sticky top-0 z-40 bg-lite-card/95 dark:bg-dark-card/95 backdrop-blur-md border-b border-lite-border/80 dark:border-dark-border shadow-3d-sm">
+    
+    <div id="home-top-bar" class="max-w-2xl mx-auto px-3.5 py-2 flex items-center justify-between transition-all duration-200">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('feed')">
+        <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-brand to-blue-400 bg-clip-text text-transparent drop-shadow-sm">SocialX</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-brand/10 text-brand border border-brand/20">Lite 3D</span>
+      </div>
+      
+      <!-- Top Action Buttons (+ and Search) -->
+      <div class="flex items-center gap-2">
+        <button onclick="openPostTypeDropdown(event)" class="btn-3d w-9 h-9 rounded-full bg-lite-bg border border-lite-border flex items-center justify-center text-lite-text shadow-3d-sm hover:border-brand/40" title="Create Post">
+          <i data-lucide="plus" class="w-5 h-5 stroke-[2.5]"></i>
+        </button>
+        <button onclick="openSearchModal()" class="btn-3d w-9 h-9 rounded-full bg-lite-bg border border-lite-border flex items-center justify-center text-lite-text shadow-3d-sm hover:border-brand/40" title="Search">
+          <i data-lucide="search" class="w-4 h-4 stroke-[2.5]"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="max-w-2xl mx-auto px-1 flex items-center justify-around border-t border-lite-border/50 dark:border-dark-border/50">
+      <button onclick="switchTab('feed')" id="tab-btn-feed" class="tab-btn relative flex-1 py-2.5 flex justify-center items-center text-brand border-b-[3px] border-brand transition-all" title="Home Feed">
+        <i data-lucide="home" class="w-6 h-6 stroke-[2.2] drop-shadow-sm"></i>
+      </button>
+
+      <button onclick="switchTab('friends')" id="tab-btn-friends" class="tab-btn relative flex-1 py-2.5 flex justify-center items-center text-lite-muted dark:text-dark-muted hover:text-brand border-b-[3px] border-transparent transition-all" title="Friends">
+        <i data-lucide="users" class="w-6 h-6 stroke-[2.2]"></i>
+        <span id="friends-tab-badge" class="absolute top-1.5 right-1/4 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border-2 border-white dark:border-dark-card shadow-md hidden">0</span>
+      </button>
+
+      <button onclick="switchTab('chat')" id="tab-btn-chat" class="tab-btn relative flex-1 py-2.5 flex justify-center items-center text-lite-muted dark:text-dark-muted hover:text-brand border-b-[3px] border-transparent transition-all" title="Messages">
+        <i data-lucide="message-circle" class="w-6 h-6 stroke-[2.2]"></i>
+        <span id="chat-tab-badge" class="absolute top-1.5 right-1/4 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border-2 border-white dark:border-dark-card shadow-md hidden">0</span>
+      </button>
+
+      <button onclick="switchTab('notifications')" id="tab-btn-notifications" class="tab-btn relative flex-1 py-2.5 flex justify-center items-center text-lite-muted dark:text-dark-muted hover:text-brand border-b-[3px] border-transparent transition-all" title="Notifications">
+        <i data-lucide="bell" class="w-6 h-6 stroke-[2.2]"></i>
+        <span id="notif-badge-count" class="absolute top-1.5 right-1/4 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full border-2 border-white dark:border-dark-card shadow-md hidden">0</span>
+      </button>
+
+      <button onclick="switchTab('marketplace')" id="tab-btn-marketplace" class="tab-btn relative flex-1 py-2.5 flex justify-center items-center text-lite-muted dark:text-dark-muted hover:text-brand border-b-[3px] border-transparent transition-all" title="Marketplace">
+        <i data-lucide="store" class="w-6 h-6 stroke-[2.2]"></i>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- MAIN APP CONTAINER                                           -->
+  <!-- ============================================================ -->
+  <main class="flex-1 max-w-2xl w-full mx-auto pb-16 space-y-3 sm:py-3 px-0 sm:px-2">
+
+    <!-- ==================== VIEW 1: FEED ==================== -->
+    <div id="view-feed" class="tab-view space-y-3">
+      <!-- Composer -->
+      <section class="bg-lite-card dark:bg-dark-card p-3 shadow-3d-card sm:rounded-xl border-y sm:border border-lite-border/80">
+        <div class="flex items-center gap-2.5">
+          <div class="relative shrink-0 cursor-pointer" onclick="switchTab('profile')">
+            <div class="w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-brand to-cyan-400 shadow-md overflow-hidden">
+              <img id="feed-avatar-img" src="" alt="Avatar" class="w-full h-full rounded-full object-cover" />
+            </div>
+            <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
+          </div>
+
+          <div onclick="openPostTypeDropdown(event)" class="flex-1 bg-lite-bg dark:bg-dark-border/40 hover:bg-lite-border/40 cursor-pointer rounded-full px-4 py-2.5 text-lite-muted text-sm shadow-inner transition">
+            What's on your mind?
+          </div>
+
+          <button onclick="triggerDirectMediaPost('image')" class="btn-3d flex flex-col items-center justify-center shrink-0 px-2 py-1 rounded-lg text-emerald-600 hover:bg-emerald-500/10 transition">
+            <i data-lucide="image" class="w-6 h-6 stroke-[2.2]"></i>
+            <span class="text-[11px] font-bold text-lite-muted mt-0.5">Photo</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Stories Carousel (Multi-Story Slider Card) -->
+      <section class="bg-lite-card dark:bg-dark-card py-3 px-3 shadow-3d-card sm:rounded-xl border-y sm:border border-lite-border/80 overflow-hidden">
+        <div class="flex gap-2.5 overflow-x-auto no-scrollbar py-0.5" id="stories-tray">
+          <!-- Create Story Card -->
+          <div onclick="document.getElementById('story-file-input').click()" class="relative shrink-0 w-28 h-48 rounded-xl overflow-hidden shadow-3d-sm bg-lite-bg dark:bg-dark-border/40 flex flex-col justify-between border border-lite-border cursor-pointer group hover:scale-[1.02] transition duration-200">
+            <input type="file" id="story-file-input" accept="image/*,video/*" class="hidden" onchange="handleStoryUpload(event)" />
+            <div class="h-32 w-full overflow-hidden bg-lite-border/40">
+              <img id="story-self-img" src="" class="w-full h-full object-cover group-hover:scale-105 transition" />
+            </div>
+            <div class="absolute top-[112px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-brand text-white border-2 border-white flex items-center justify-center shadow-3d-btn group-hover:scale-110 transition">
+              <i data-lucide="plus" class="w-5 h-5 font-bold stroke-[3]"></i>
+            </div>
+            <div class="pt-3.5 pb-2 text-center bg-lite-card dark:bg-dark-card">
+              <span class="text-[12px] font-bold tracking-tight block truncate px-1">Create story</span>
+            </div>
+          </div>
+          <!-- Realtime User Stories -->
+          <div id="realtime-stories-container" class="flex gap-2.5"></div>
+        </div>
+      </section>
+
+      <!-- Post Stream -->
+      <div id="posts-stream" class="space-y-3"></div>
+    </div>
+
+    <!-- ==================== VIEW 2: FRIENDS HUB ==================== -->
+    <div id="view-friends" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border/80 overflow-hidden">
+        <div class="px-4 py-3 flex items-center justify-between border-b border-lite-border/40">
+          <div class="flex items-center gap-3">
+            <button onclick="switchTab('feed')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full transition">
+              <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+            </button>
+            <h2 class="text-2xl font-black tracking-tight">Friends</h2>
+          </div>
+        </div>
+
+        <div class="px-4 py-3 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-lite-border/40">
+          <button onclick="openSubView('active-friends')" class="btn-3d shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-lite-bg text-xs font-bold border border-lite-border shadow-3d-sm">
+            <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]"></span>
+            <span id="active-friends-pill-count">0 active</span>
+          </button>
+          <button onclick="openSubView('your-friends')" class="btn-3d shrink-0 px-4 py-1.5 rounded-full bg-lite-bg text-xs font-bold border border-lite-border shadow-3d-sm">
+            Your friends
+          </button>
+          <button onclick="openSubView('suggestions')" class="btn-3d shrink-0 px-4 py-1.5 rounded-full bg-lite-bg text-xs font-bold border border-lite-border shadow-3d-sm">
+            Suggestions
+          </button>
+        </div>
+
+        <div class="px-4 pt-3.5 pb-2 flex items-center justify-between">
+          <h3 class="font-black text-[17px]">Friend requests <span id="req-hub-count" class="text-lite-muted font-bold">(0)</span></h3>
+          <button onclick="openSubView('all-requests')" class="text-brand font-bold text-sm hover:underline">See all</button>
+        </div>
+
+        <div class="px-4 py-2 space-y-3.5" id="hub-requests-container"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: FRIEND REQUESTS (SEE ALL) -->
+    <div id="view-all-requests" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="px-4 py-3 flex items-center justify-between border-b border-lite-border/40">
+          <div class="flex items-center gap-3">
+            <button onclick="openSubView('friends')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full transition">
+              <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+            </button>
+            <h2 class="text-2xl font-black tracking-tight">Friend requests</h2>
+          </div>
+        </div>
+        <div class="px-4 pt-3 pb-1 flex items-center justify-between">
+          <h3 class="font-black text-[16px]">Friend requests <span id="req-seeall-count">(0)</span></h3>
+        </div>
+        <div class="px-4 py-2 space-y-4" id="all-requests-container"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: ACTIVE FRIENDS -->
+    <div id="view-active-friends" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="px-4 py-3 flex items-center gap-3 border-b border-lite-border/40">
+          <button onclick="openSubView('friends')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+            <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+          </button>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></span>
+            <h2 class="text-2xl font-black tracking-tight">Active Friends</h2>
+          </div>
+        </div>
+        <div class="divide-y divide-lite-border/40" id="active-friends-list"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 5: YOUR FRIENDS -->
+    <div id="view-your-friends" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="px-4 py-3 flex items-center gap-3 border-b border-lite-border/40">
+          <button onclick="openSubView('friends')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+            <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+          </button>
+          <h2 class="text-2xl font-black tracking-tight">Your friends</h2>
+        </div>
+        <div class="divide-y divide-lite-border/40" id="your-friends-list"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 6: SUGGESTIONS -->
+    <div id="view-suggestions" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="px-4 py-3 flex items-center gap-3 border-b border-lite-border/40">
+          <button onclick="openSubView('friends')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+            <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+          </button>
+          <h2 class="text-2xl font-black tracking-tight">Suggestions</h2>
+        </div>
+        <div class="px-4 pt-3 pb-1">
+          <h3 class="font-black text-[16px]">People you may know</h3>
+        </div>
+        <div class="px-4 py-2 space-y-3" id="suggestions-list"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 7: MESSAGES LIST -->
+    <div id="view-chat" class="tab-view hidden space-y-3 px-0 sm:px-2 relative">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden min-h-[80vh]">
+        <div class="px-4 py-3 flex items-center justify-between border-b border-lite-border/40">
+          <div class="flex items-center gap-3">
+            <button onclick="switchTab('feed')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+              <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+            </button>
+            <h2 class="text-2xl font-black tracking-tight">Messages</h2>
+          </div>
+        </div>
+        <div class="divide-y divide-lite-border/30" id="chat-threads-list"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 8: DEDICATED FULL CHAT ROOM -->
+    <div id="view-chat-room" class="tab-view hidden space-y-0 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden h-[84vh] flex flex-col justify-between">
+        <div class="px-3 py-2.5 bg-lite-card dark:bg-dark-card border-b border-lite-border/60 flex items-center justify-between shadow-sm">
+          <div class="flex items-center gap-2.5">
+            <button onclick="switchTab('chat')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+              <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+            </button>
+            <div class="relative shrink-0 cursor-pointer" onclick="openUserProfile(activeChatUserId)">
+              <img id="chat-room-avatar" src="" class="w-10 h-10 rounded-full object-cover border border-lite-border" />
+              <span id="chat-room-active-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+            </div>
+            <div class="cursor-pointer" onclick="openUserProfile(activeChatUserId)">
+              <h4 id="chat-room-name" class="font-bold text-[15px] leading-tight hover:underline">User Name</h4>
+              <p id="chat-room-status" class="text-[11px] text-green-600 font-semibold">Active now</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 text-brand">
+            <button onclick="triggerCall('audio')" class="btn-3d p-2 rounded-full bg-lite-bg hover:bg-brand hover:text-white shadow-3d-sm transition" title="Audio Call">
+              <i data-lucide="phone" class="w-4 h-4 stroke-[2.5]"></i>
+            </button>
+            <button onclick="triggerCall('video')" class="btn-3d p-2 rounded-full bg-lite-bg hover:bg-brand hover:text-white shadow-3d-sm transition" title="Video Call">
+              <i data-lucide="video" class="w-4 h-4 stroke-[2.5]"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="chat-room-messages" class="flex-1 p-3 overflow-y-auto space-y-2.5 bg-lite-bg/40 text-xs"></div>
+
+        <div class="p-2.5 bg-lite-card dark:bg-dark-card border-t border-lite-border/60 flex items-center gap-2">
+          <input type="file" id="chat-image-file" accept="image/*,video/*" class="hidden" onchange="sendChatMediaFile(event)" />
+          <button onclick="document.getElementById('chat-image-file').click()" class="btn-3d text-brand p-1.5 rounded-full hover:bg-lite-bg" title="Send Photo/Video">
+            <i data-lucide="image" class="w-5 h-5"></i>
+          </button>
+          <input id="chat-room-input" type="text" placeholder="Type a message..." class="flex-1 text-xs px-3.5 py-2.5 rounded-full bg-lite-bg border border-lite-border outline-none focus:border-brand shadow-inner" onkeydown="if(event.key==='Enter') sendRoomMessage()" />
+          <button onclick="sendRoomMessage()" class="btn-3d w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center shadow-3d-btn">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 9: NOTIFICATIONS -->
+    <div id="view-notifications" class="tab-view hidden space-y-2 px-2 sm:px-0">
+      <div class="bg-lite-card dark:bg-dark-card p-3 rounded-xl shadow-3d-card border border-lite-border">
+        <h3 class="font-bold text-base mb-2">Notifications</h3>
+        <div class="divide-y divide-lite-border/50" id="notifications-list-container">
+          <div class="text-center py-8 text-xs text-lite-muted">No notifications yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 10: MARKETPLACE -->
+    <div id="view-marketplace" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden pb-8 space-y-4">
+        
+        <div class="px-4 py-3 flex items-center justify-between border-b border-lite-border/60">
+          <div class="flex items-center gap-2">
+            <i data-lucide="store" class="w-6 h-6 text-brand"></i>
+            <h2 class="text-xl font-black tracking-tight">SocialX Marketplace & Tasks</h2>
+          </div>
+          <span class="text-xs font-bold text-brand bg-brand/10 px-2.5 py-1 rounded-full">PSP Store</span>
+        </div>
+
+        <!-- 1. Top Auto-Slider -->
+        <div class="px-4">
+          <div class="relative w-full h-44 rounded-2xl overflow-hidden shadow-3d-card bg-slate-900 select-none group" id="market-slider-box">
+            <div id="market-slider-track" class="flex h-full transition-transform duration-500 ease-out">
+              <div class="w-full shrink-0 h-full bg-gradient-to-r from-emerald-600 via-teal-700 to-cyan-800 p-5 text-white flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] uppercase font-black bg-white/20 px-2 py-0.5 rounded">Daily Bonus</span>
+                  <h3 class="text-xl font-black mt-1">Daily Check-in 🎁</h3>
+                  <p class="text-xs opacity-90 mt-0.5">Claim 50 PSP Coins every day for free!</p>
+                </div>
+                <button onclick="openMarketTaskModal('daily')" class="btn-3d w-fit px-4 py-2 bg-white text-emerald-700 font-black text-xs rounded-xl shadow-lg">CLAIM 50 COINS</button>
+              </div>
+
+              <div class="w-full shrink-0 h-full bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800 p-5 text-white flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] uppercase font-black bg-white/20 px-2 py-0.5 rounded">Task Rewards</span>
+                  <h3 class="text-xl font-black mt-1">Mega Task Rewards 🚀</h3>
+                  <p class="text-xs opacity-90 mt-0.5">Complete simple tasks & earn up to 500 Coins!</p>
+                </div>
+                <button onclick="openMarketTaskModal('tasks')" class="btn-3d w-fit px-4 py-2 bg-white text-purple-700 font-black text-xs rounded-xl shadow-lg">VIEW TASKS</button>
+              </div>
+
+              <div class="w-full shrink-0 h-full bg-gradient-to-r from-amber-500 via-orange-600 to-rose-700 p-5 text-white flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] uppercase font-black bg-white/20 px-2 py-0.5 rounded">5-Quiz Challenge</span>
+                  <h3 class="text-xl font-black mt-1">Live 5-Quiz Contest 🧠</h3>
+                  <p class="text-xs opacity-90 mt-0.5">Answer 5 questions & watch 15s ad to get 5 Coins!</p>
+                </div>
+                <button onclick="start5QuizChallenge()" class="btn-3d w-fit px-4 py-2 bg-white text-rose-700 font-black text-xs rounded-xl shadow-lg">START 5-QUIZ</button>
+              </div>
+            </div>
+
+            <button onclick="prevMarketSlide()" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/70 transition"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+            <button onclick="nextMarketSlide()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/70 transition"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+          </div>
+        </div>
+
+        <!-- 2. Earn Coins & Tasks Cards -->
+        <div class="px-4 space-y-2">
+          <h3 class="font-black text-sm text-lite-text">Earn Coins & Tasks</h3>
+          <div class="grid grid-cols-3 gap-2 text-center" id="market-task-cards-grid">
+            <div onclick="start15SecondAdTask('Watch Ads', 15)" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200" class="w-full aspect-video rounded-xl object-cover mb-1.5 shadow" />
+              <h4 class="font-bold text-xs">Watch Ads</h4>
+              <span class="text-[10px] text-emerald-600 font-black">+15 Coins</span>
+            </div>
+
+            <div onclick="openMarketTaskModal('daily')" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+              <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200" class="w-full aspect-video rounded-xl object-cover mb-1.5 shadow" />
+              <h4 class="font-bold text-xs">Daily Task</h4>
+              <span class="text-[10px] text-purple-600 font-black">+50 Coins</span>
+            </div>
+
+            <div onclick="start5QuizChallenge()" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+              <img src="https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=200" class="w-full aspect-video rounded-xl object-cover mb-1.5 shadow" />
+              <h4 class="font-bold text-xs">5-Quiz Game</h4>
+              <span class="text-[10px] text-amber-600 font-black">+5 Coins</span>
+            </div>
+
+            <div onclick="openMarketTaskModal('spin')" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+              <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=200" class="w-full aspect-video rounded-xl object-cover mb-1.5 shadow" />
+              <h4 class="font-bold text-xs">Lucky Spin</h4>
+              <span class="text-[10px] text-brand font-black">Spin & Win</span>
+            </div>
+
+            <div onclick="openMarketTaskModal('offers')" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+              <img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=200" class="w-full aspect-video rounded-xl object-cover mb-1.5 shadow" />
+              <h4 class="font-bold text-xs">Hot Offers</h4>
+              <span class="text-[10px] text-rose-600 font-black">Big Rewards</span>
+            </div>
+
+            <div onclick="openMarketTaskModal('install')" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+              <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=200" class="w-full aspect-video rounded-xl object-cover mb-1.5 shadow" />
+              <h4 class="font-bold text-xs">Install Apps</h4>
+              <span class="text-[10px] text-teal-600 font-black">+100 Coins</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Featured Marketplace Products -->
+        <div class="px-4 space-y-2 pt-2 border-t border-lite-border/60">
+          <div class="flex items-center justify-between">
+            <h3 class="font-black text-sm text-lite-text">Featured Items</h3>
+            <span class="text-xs text-brand font-bold">3 items per row</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="marketplace-products-grid"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 11: OWN PROFILE VIEW -->
+    <div id="view-profile" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="h-40 sm:h-48 bg-gradient-to-r from-blue-600 via-indigo-600 to-brand relative overflow-hidden">
+          <img id="profile-cover-display" src="" class="w-full h-full object-cover" />
+        </div>
+
+        <div class="px-4 pb-4 relative pt-14 flex flex-col items-center text-center">
+          <div class="absolute -top-14 w-28 h-28 rounded-full p-1 bg-lite-card dark:bg-dark-card shadow-2xl">
+            <img id="profile-avatar-display" src="" class="w-full h-full rounded-full object-cover" />
+            <span class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-md"></span>
+          </div>
+
+          <h2 id="profile-name-display" class="text-xl font-black mt-1">User Name</h2>
+          <p id="profile-bio-display" class="text-xs text-lite-muted max-w-sm mt-1 leading-relaxed"></p>
+
+          <div class="flex items-center justify-around w-full max-w-md my-3.5 py-2.5 px-4 rounded-xl bg-lite-bg text-xs border border-lite-border/70 shadow-3d-sm">
+            <div class="cursor-pointer" onclick="openSubView('your-friends')">
+              <b id="my-friends-count" class="text-sm block">0</b>
+              <span class="text-lite-muted text-[11px]">Friends</span>
+            </div>
+            <div class="w-[1px] h-6 bg-lite-border"></div>
+            <div>
+              <b id="my-posts-count" class="text-sm block">0</b>
+              <span class="text-lite-muted text-[11px]">Posts</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-Tabs -->
+        <div class="px-3 border-t border-lite-border/60 flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-bold py-2.5 bg-lite-bg/40">
+          <button id="prof-tab-all" onclick="filterProfileTab('all')" class="prof-tab-btn px-4 py-1.5 rounded-full bg-brand text-white shadow-3d-btn transition">All</button>
+          <button id="prof-tab-videos" onclick="filterProfileTab('videos')" class="prof-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">Videos</button>
+          <button id="prof-tab-photos" onclick="filterProfileTab('photos')" class="prof-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">Photos</button>
+          <button id="prof-tab-about" onclick="filterProfileTab('about')" class="prof-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">About Info</button>
+          <button id="prof-tab-settings" onclick="filterProfileTab('settings')" class="prof-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">Settings</button>
+        </div>
+
+        <div id="profile-tab-content" class="p-3"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 12: VISITING OTHER USER'S PROFILE -->
+    <div id="view-user-profile" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="px-4 py-3 flex items-center justify-between border-b border-lite-border/40 sticky top-0 bg-lite-card dark:bg-dark-card z-20">
+          <div class="flex items-center gap-3">
+            <button onclick="switchTab('friends')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+              <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+            </button>
+            <h2 id="up-header-name" class="text-xl font-bold">User Profile</h2>
+          </div>
+        </div>
+
+        <div class="h-40 sm:h-48 bg-gradient-to-r from-teal-700 via-blue-700 to-indigo-800 relative overflow-hidden">
+          <img id="up-cover-display" src="" class="w-full h-full object-cover" />
+        </div>
+
+        <div class="px-4 pb-4 relative pt-14 flex flex-col items-center text-center">
+          <div class="absolute -top-14 w-28 h-28 rounded-full p-1 bg-lite-card dark:bg-dark-card shadow-2xl">
+            <img id="up-avatar-display" src="" class="w-full h-full rounded-full object-cover" />
+            <span id="up-active-dot" class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-md"></span>
+          </div>
+
+          <h2 id="up-name-display" class="text-xl font-black mt-1">User Name</h2>
+          <p id="up-bio-display" class="text-xs text-lite-muted max-w-sm mt-1 leading-relaxed"></p>
+
+          <div id="up-actions-container" class="flex gap-2 w-full max-w-md mt-4"></div>
+        </div>
+
+        <div class="px-3 border-t border-lite-border/60 flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-bold py-2.5 bg-lite-bg/40">
+          <button id="up-tab-all" onclick="filterUserProfileTab('all')" class="up-tab-btn px-4 py-1.5 rounded-full bg-brand text-white shadow-3d-btn transition">All</button>
+          <button id="up-tab-videos" onclick="filterUserProfileTab('videos')" class="up-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">Videos</button>
+          <button id="up-tab-photos" onclick="filterUserProfileTab('photos')" class="up-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">Photos</button>
+          <button id="up-tab-about" onclick="filterUserProfileTab('about')" class="up-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition">About Info</button>
+        </div>
+
+        <div id="up-tab-content" class="p-3"></div>
+      </div>
+    </div>
+
+    <!-- VIEW 13: EDIT PROFILE PAGE -->
+    <div id="view-edit-profile" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden pb-10">
+        <div class="px-4 py-3 flex items-center gap-3 border-b border-lite-border/60 sticky top-0 bg-lite-card dark:bg-dark-card z-20">
+          <button onclick="switchTab('profile')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+            <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+          </button>
+          <h2 class="text-xl font-bold tracking-tight">Edit Profile Information</h2>
+        </div>
+
+        <div class="relative mb-16">
+          <div class="h-44 w-full relative bg-slate-900 overflow-hidden">
+            <img id="ep-cover-img" src="" class="w-full h-full object-cover" />
+            <input type="file" id="ep-cover-file" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event, 'cover')" />
+            <button onclick="document.getElementById('ep-cover-file').click()" class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white shadow-lg border border-lite-border flex items-center justify-center text-lite-text">
+              <i data-lucide="camera" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full p-1 bg-white shadow-2xl">
+            <img id="ep-avatar-img" src="" class="w-full h-full rounded-full object-cover" />
+            <input type="file" id="ep-avatar-file" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event, 'avatar')" />
+            <button onclick="document.getElementById('ep-avatar-file').click()" class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-white shadow-md border border-lite-border flex items-center justify-center text-lite-text">
+              <i data-lucide="camera" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="px-4 divide-y divide-lite-border/40 text-sm space-y-4">
+          <div class="pt-2">
+            <h3 class="font-black text-base py-1">Intro & Bio</h3>
+            <div class="space-y-3 mt-2">
+              <div class="flex items-start justify-between gap-3">
+                <div><h4 class="font-bold text-sm">Bio</h4><p id="ep-field-bio" class="text-xs text-lite-muted">Not added</p></div>
+                <button onclick="openFieldEditor('Bio', 'bio', 'text')" class="p-1 text-lite-muted"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3">
+            <h3 class="font-black text-base py-1">Personal Details</h3>
+            <div class="space-y-3 mt-2">
+              <div class="flex items-center justify-between">
+                <div><h4 class="font-bold text-sm">Location</h4><p id="ep-field-location" class="text-xs text-lite-muted">Not added</p></div>
+                <button onclick="openFieldEditor('Location', 'location', 'text')" class="p-1 text-lite-muted"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+              </div>
+              <div class="flex items-center justify-between">
+                <div><h4 class="font-bold text-sm">Birthday</h4><p id="ep-field-birthday" class="text-xs text-lite-muted">Not added</p></div>
+                <button onclick="openFieldEditor('Birthday', 'birthday', 'date')" class="p-1 text-lite-muted"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VIEW 14: 3D WALLET VIEW (100% FIXED)                          -->
+    <!-- ============================================================ -->
+    <div id="view-wallet" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden pb-8">
+        <div class="px-4 py-3 flex items-center justify-between border-b border-lite-border/60 sticky top-0 bg-lite-card dark:bg-dark-card z-20">
+          <div class="flex items-center gap-3">
+            <button onclick="switchTab('profile')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+              <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+            </button>
+            <h2 class="text-xl font-black tracking-tight">SocialX 3D Wallet</h2>
+          </div>
+        </div>
+
+        <div class="px-3 border-b border-lite-border/60 flex items-center justify-around text-xs font-bold py-2 bg-lite-bg/40">
+          <button id="wallet-tab-earning" onclick="switchWalletTab('earning')" class="w-tab-btn py-2 px-3 rounded-xl bg-brand text-white shadow-3d-btn">1. Earning Account</button>
+          <button id="wallet-tab-withdraw" onclick="switchWalletTab('withdraw')" class="w-tab-btn py-2 px-3 rounded-xl bg-lite-card border border-lite-border text-lite-text">2. Withdraw</button>
+          <button id="wallet-tab-history" onclick="switchWalletTab('history')" class="w-tab-btn py-2 px-3 rounded-xl bg-lite-card border border-lite-border text-lite-text">3. History</button>
+        </div>
+
+        <!-- 1. Earning Account -->
+        <div id="wallet-sec-earning" class="p-4 space-y-4">
+          <div class="w-full h-48 rounded-3xl p-5 bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-700 text-white shadow-3d-gold-card relative overflow-hidden flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <img id="wallet-card-avatar" src="" class="w-12 h-12 rounded-full border-2 border-white/80 object-cover shadow-md" />
+                <div>
+                  <h4 id="wallet-card-name" class="font-black text-base drop-shadow">User Name</h4>
+                  <span class="text-[11px] opacity-90 font-medium">PSP Token Account</span>
+                </div>
+              </div>
+              <span class="text-2xl font-black italic opacity-80">PSP</span>
+            </div>
+
+            <div class="flex justify-between items-end">
+              <div>
+                <span class="text-[10px] uppercase font-bold tracking-wider opacity-80">Total Balance</span>
+                <h3 class="text-2xl font-black drop-shadow">৳ <span id="wallet-bdt-balance">0.00</span> BDT</h3>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] uppercase font-bold tracking-wider opacity-80">PSP Token Coins</span>
+                <p class="text-lg font-black drop-shadow"><span id="wallet-coins-balance">0</span> Coins</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-lite-bg dark:bg-dark-border/20 p-4 rounded-2xl border border-lite-border shadow-3d-sm space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="font-black text-sm text-lite-text">Convert to BDT</h4>
+              <span class="text-xs text-brand font-bold">1,000 Coins = 7.50 BDT</span>
+            </div>
+            <input type="number" id="convert-coins-input" placeholder="Enter coins (Min 500)" class="w-full text-xs p-3 rounded-xl bg-lite-card border border-lite-border outline-none font-bold shadow-inner" />
+            <p class="text-[11px] text-lite-muted">Minimum conversion: <b>500 Coins</b>.</p>
+            <button onclick="handleCoinsConvert()" class="btn-3d w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-3d-btn">
+              CONVERT COINS TO BDT
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Withdraw Tab -->
+        <div id="wallet-sec-withdraw" class="p-4 space-y-4 hidden">
+          <div class="space-y-3">
+            <label class="text-xs font-bold text-lite-muted">Select Payment Method</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="selectWithdrawMethod('bKash')" id="wm-bKash" class="wm-btn py-3 px-2 rounded-2xl border border-pink-500 bg-pink-500/10 text-pink-600 font-black text-xs text-center shadow-sm">bKash (বিকাশ)</button>
+              <button onclick="selectWithdrawMethod('Nagad')" id="wm-Nagad" class="wm-btn py-3 px-2 rounded-2xl border border-lite-border bg-lite-bg text-lite-text font-black text-xs text-center shadow-sm">Nagad (নগদ)</button>
+              <button onclick="selectWithdrawMethod('Rocket')" id="wm-Rocket" class="wm-btn py-3 px-2 rounded-2xl border border-lite-border bg-lite-bg text-lite-text font-black text-xs text-center shadow-sm">Rocket (রকেট)</button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs font-bold text-lite-muted">Withdraw Amount (BDT)</label>
+              <input type="number" id="withdraw-amount" placeholder="Enter amount" class="w-full text-xs p-3 rounded-xl bg-lite-bg border border-lite-border outline-none font-bold shadow-inner mt-1" />
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-lite-muted">Account Number</label>
+              <input type="tel" id="withdraw-number" placeholder="01XXXXXXXXX" class="w-full text-xs p-3 rounded-xl bg-lite-bg border border-lite-border outline-none font-bold shadow-inner mt-1" />
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-lite-muted">Account Type</label>
+              <select id="withdraw-type" class="w-full text-xs p-3 rounded-xl bg-lite-bg border border-lite-border outline-none font-bold shadow-inner mt-1">
+                <option value="Personal">Personal (মিনিমাম ১৫০ টাকা)</option>
+                <option value="Agent">Agent (মিনিমাম ৫০০ টাকা)</option>
+              </select>
+            </div>
+          </div>
+
+          <button onclick="handleWithdrawSubmit()" class="btn-3d w-full py-3 bg-brand text-white font-bold text-sm rounded-xl shadow-3d-btn">
+            SUBMIT WITHDRAW REQUEST
+          </button>
+        </div>
+
+        <!-- 3. History Tab -->
+        <div id="wallet-sec-history" class="p-4 space-y-3 hidden">
+          <h4 class="font-black text-sm">Transaction History</h4>
+          <div id="wallet-history-list" class="divide-y divide-lite-border/50 text-xs">
+            <p class="text-center text-lite-muted py-8">No transactions yet.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 15: FULL POST DETAILS VIEW -->
+    <div id="view-post-details" class="tab-view hidden space-y-3 px-0 sm:px-2">
+      <div class="bg-lite-card dark:bg-dark-card rounded-none sm:rounded-xl shadow-3d-card border-y sm:border border-lite-border overflow-hidden">
+        <div class="px-4 py-3 flex items-center gap-3 border-b border-lite-border/40">
+          <button onclick="switchTab('profile')" class="btn-3d p-1 text-lite-text hover:bg-lite-bg rounded-full">
+            <i data-lucide="chevron-left" class="w-7 h-7 stroke-[2.5]"></i>
+          </button>
+          <h2 class="text-xl font-bold">Post Details</h2>
+        </div>
+        <div id="post-details-card-body" class="p-0"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- MODALS                                                       -->
+  <!-- ============================================================ -->
+  <div id="ad-timer-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex-col items-center justify-center p-4">
+    <div class="bg-lite-card dark:bg-dark-card w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl border border-lite-border">
+      <div class="w-16 h-16 rounded-full bg-brand/10 text-brand flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="play-circle" class="w-8 h-8 animate-pulse"></i>
+      </div>
+      <div class="space-y-1">
+        <h3 class="font-black text-lg text-lite-text">Sponsored Video Ad</h3>
+        <p class="text-xs text-lite-muted" id="ad-reward-desc">Watch for 15 seconds to claim your Coins reward!</p>
+      </div>
+      <div class="py-2">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-lite-bg border-4 border-brand text-2xl font-black text-brand shadow-3d-card">
+          <span id="ad-countdown-seconds">15</span>s
+        </div>
+      </div>
+      <p class="text-[11px] text-lite-muted">Please do not close this window until the timer finishes.</p>
+    </div>
+  </div>
+
+  <div id="quiz-game-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden items-center justify-center p-3">
+    <div class="bg-lite-card dark:bg-dark-card w-full max-w-md rounded-3xl p-6 shadow-2xl border border-lite-border space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <div>
+          <span class="text-[10px] font-black uppercase text-brand bg-brand/10 px-2 py-0.5 rounded-full" id="quiz-step-badge">Question 1/5</span>
+          <h3 class="font-black text-base text-lite-text mt-0.5">5-Quiz Challenge</h3>
+        </div>
+        <button onclick="closeQuizModal()"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <p class="font-bold text-sm text-lite-text" id="quiz-question-text">Question goes here</p>
+        <div class="space-y-2" id="quiz-options-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="market-task-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3">
+    <div class="bg-lite-card dark:bg-dark-card w-full max-w-md rounded-2xl p-5 shadow-2xl border border-lite-border space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="mt-modal-title" class="font-black text-base text-lite-text">Task Details</h3>
+        <button onclick="closeMarketTaskModal()"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="mt-modal-content" class="space-y-3 text-xs"></div>
+      <button id="mt-modal-action-btn" class="btn-3d w-full py-2.5 bg-brand text-white font-bold rounded-xl shadow-3d-btn text-xs">
+        CLAIM REWARD
+      </button>
+    </div>
+  </div>
+
+  <div id="field-editor-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-3">
+    <div class="bg-lite-card dark:bg-dark-card w-full max-w-md rounded-2xl p-5 shadow-2xl border border-lite-border space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="fe-title" class="font-bold text-base">Edit Field</h3>
+        <button onclick="closeFieldEditor()"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="fe-input-container" class="space-y-2"></div>
+      <button id="fe-save-btn" onclick="saveFieldEditorValue()" class="btn-3d w-full py-2.5 bg-brand text-white font-bold rounded-xl shadow-3d-btn mt-2">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <div id="full-create-post-page" class="fixed inset-0 z-50 bg-lite-card dark:bg-dark-card hidden flex-col justify-between overflow-y-auto">
+    <div class="p-3.5 border-b border-lite-border/60 flex items-center justify-between sticky top-0 bg-lite-card dark:bg-dark-card z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="document.getElementById('full-create-post-page').classList.add('hidden')" class="btn-3d p-1 text-lite-text rounded-full">
+          <i data-lucide="arrow-left" class="w-6 h-6 stroke-[2.5]"></i>
+        </button>
+        <h3 class="font-black text-lg">Create post</h3>
+      </div>
+      <button onclick="publishRealtimePost()" class="btn-3d text-brand font-black text-base px-2 py-1 uppercase tracking-wider">
+        POST
+      </button>
+    </div>
+
+    <div class="p-4 flex-1 space-y-4">
+      <div class="flex items-center gap-3">
+        <img id="cp-avatar" src="" class="w-12 h-12 rounded-full object-cover border border-lite-border" />
+        <div>
+          <h4 id="cp-user-name" class="font-bold text-base text-lite-text">User Name</h4>
+          <span class="text-xs text-lite-muted">🌎 Public</span>
+        </div>
+      </div>
+
+      <div id="cp-textbox-wrapper" class="w-full min-h-[140px] rounded-xl p-3 transition duration-200">
+        <textarea id="cp-caption-input" rows="4" placeholder="What's on your mind?" class="w-full bg-transparent text-lg outline-none resize-none font-medium"></textarea>
+      </div>
+
+      <div id="cp-preview-container" class="hidden relative rounded-xl overflow-hidden border border-lite-border bg-black max-h-60 flex items-center justify-center">
+        <img id="cp-image-preview" src="" class="hidden max-h-60 w-full object-contain" />
+        <video id="cp-video-preview" controls class="hidden max-h-60 w-full"></video>
+        <button onclick="clearCpMedia()" class="absolute top-2 right-2 bg-black/70 text-white p-1 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="divide-y divide-lite-border/40 text-sm font-semibold border-t border-lite-border/60">
+        <input type="file" id="cp-file-input" accept="image/*,video/*" class="hidden" onchange="handleCpFileSelect(event)" />
+        <div onclick="document.getElementById('cp-file-input').click()" class="py-3 flex items-center gap-3 cursor-pointer hover:bg-lite-bg/50 px-1 rounded-lg">
+          <span class="text-xl">🖼️</span><span>Photos/videos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 border-t border-lite-border/60 bg-lite-card dark:bg-dark-card sticky bottom-0">
+      <button id="main-post-publish-btn" onclick="publishRealtimePost()" class="btn-3d w-full py-3 bg-brand text-white font-bold text-base rounded-xl shadow-3d-btn flex items-center justify-center gap-2">
+        <span id="post-btn-text">POST</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="post-type-dropdown" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end sm:items-center justify-center p-2" onclick="closePostTypeDropdown()">
+    <div class="bg-lite-card dark:bg-dark-card w-full max-w-sm rounded-2xl p-3 shadow-2xl space-y-2 border border-lite-border" onclick="event.stopPropagation()">
+      <h3 class="font-bold text-sm px-2 py-1 text-lite-muted">Create New</h3>
+      <button onclick="triggerDirectMediaPost('image')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-lite-bg font-bold text-sm text-left">
+        <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="image" class="w-5 h-5"></i></div>
+        <div><p>Post Photo</p><span class="text-[11px] text-lite-muted font-normal">Upload photo</span></div>
+      </button>
+      <button onclick="triggerDirectMediaPost('video')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-lite-bg font-bold text-sm text-left">
+        <div class="w-9 h-9 rounded-full bg-blue-100 text-brand flex items-center justify-center"><i data-lucide="video" class="w-5 h-5"></i></div>
+        <div><p>Post Video</p><span class="text-[11px] text-lite-muted font-normal">Upload video</span></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- REALTIME SEARCH MODAL -->
+  <div id="search-modal" class="fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-3">
+    <div class="bg-lite-card dark:bg-dark-card w-full max-w-md rounded-2xl p-4 border border-lite-border shadow-2xl space-y-3">
+      <div class="flex items-center gap-2 border-b border-lite-border pb-2">
+        <i data-lucide="search" class="w-5 h-5 text-brand"></i>
+        <input type="text" id="live-search-input" oninput="handleLiveSearch(this.value)" placeholder="Search users by name..." class="w-full bg-transparent text-sm outline-none font-medium" autofocus />
+        <button onclick="document.getElementById('search-modal').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="search-results-list" class="max-h-72 overflow-y-auto divide-y divide-lite-border/40 text-xs">
+        <p class="text-center text-lite-muted py-6">Type a name to search users on SocialX...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL STORY VIEWER MODAL -->
+  <div id="story-viewer-modal" class="fixed inset-0 z-50 bg-black hidden flex-col justify-between overflow-hidden select-none">
+    <div class="p-3.5 z-20 bg-gradient-to-b from-black/80 to-transparent space-y-2">
+      <div id="story-progress-bars" class="flex gap-1.5 w-full"></div>
+      
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="openStoryUserFullProfile()">
+          <div class="relative">
+            <img id="story-user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white object-cover" />
+            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+          </div>
+          <div>
+            <h4 id="story-user-name" class="text-white font-bold text-sm leading-tight hover:underline">User</h4>
+            <span id="story-time-ago" class="text-[11px] text-white/80">Just now</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 text-white">
+          <button onclick="closeStoryViewer()" class="p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Media -->
+    <div class="relative flex-1 flex items-center justify-center">
+      <img id="story-main-img" src="" class="w-full h-full object-contain" />
+      <video id="story-main-video" playsinline class="hidden w-full h-full object-contain"></video>
+
+      <!-- Nav Arrows -->
+      <button onclick="prevStorySlide()" class="absolute left-3 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center backdrop-blur-sm shadow hover:bg-black/60">
+        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+      </button>
+      <button onclick="nextStorySlide()" class="absolute right-3 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center backdrop-blur-sm shadow hover:bg-black/60">
+        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="p-3.5 z-20 bg-gradient-to-t from-black/80 to-transparent flex items-center gap-2">
+      <input type="text" id="story-reply-input" placeholder="Send message..." class="flex-1 text-xs px-4 py-3 rounded-full bg-white/20 text-white placeholder-white/70 border border-white/30 outline-none backdrop-blur-sm" onkeydown="if(event.key==='Enter') sendStoryReply()" />
+      <button onclick="reactToStory('❤️')" class="text-2xl hover:scale-125 transition">❤️</button>
+      <button onclick="reactToStory('👍')" class="text-2xl hover:scale-125 transition">👍</button>
+      <button onclick="reactToStory('😂')" class="text-2xl hover:scale-125 transition">😂</button>
+    </div>
+  </div>
+
+  <!-- CALLING SCREEN MODAL -->
+  <div id="call-modal" class="fixed inset-0 z-50 bg-slate-950 text-white hidden flex-col justify-between p-6">
+    <div class="text-center pt-8 space-y-2">
+      <img id="call-user-avatar" src="" class="w-24 h-24 rounded-full mx-auto border-4 border-white/20 shadow-2xl object-cover" />
+      <h3 id="call-user-name" class="text-xl font-black">User</h3>
+      <p id="call-status" class="text-xs text-green-400 animate-pulse">Ringing...</p>
+    </div>
+    <div class="flex items-center justify-center gap-6 pb-12">
+      <button onclick="alert('Microphone Muted')" class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white"><i data-lucide="mic-off" class="w-6 h-6"></i></button>
+      <button onclick="endCall()" class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white shadow-2xl hover:scale-105 transition"><i data-lucide="phone-off" class="w-7 h-7"></i></button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODULAR JAVASCRIPT: REALTIME DATABASE & AUTH ENGINE          -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      signOut, 
+      sendPasswordResetEmail, 
+      updateProfile 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getDatabase, 
+      ref, 
+      push, 
+      set, 
+      get, 
+      update, 
+      remove, 
+      onValue, 
+      runTransaction, 
+      onDisconnect, 
+      query, 
+      limitToLast 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpACSi5Y3hiEqnoNtcj18wNyeEjuQjS2o",
+      authDomain: "gooldtube-tour.firebaseapp.com",
+      databaseURL: "https://gooldtube-tour-default-rtdb.firebaseio.com",
+      projectId: "gooldtube-tour",
+      storageBucket: "gooldtube-tour.firebasestorage.app",
+      messagingSenderId: "1020534573794",
+      appId: "1:1020534573794:web:8fe497b17cd7508fed2cbb",
+      measurementId: "G-M16TBVMG2Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let isRegisterMode = false;
+    let currentUser = null;
+    let currentUserData = null;
+
+    let allUsersMap = {};
+    let realPostsList = [];
+    let activeChatUserId = null;
+    let activeViewedUserId = null;
+
+    let cpSelectedFileType = "none";
+    let cpSelectedDataUrl = "";
+
+    // Stories State
+    let groupedStoriesByUser = {};
+    let activeStoryAuthorId = null;
+    let activeStoryIndex = 0;
+    let storyAutoTimer = null;
+
+    // Marketplace slider & wallet state
+    let currentMarketSlide = 0;
+    const totalMarketSlides = 3;
+    let currentWithdrawMethod = "bKash";
+    let currentEditingDbKey = "";
+
+    // 5-Quiz Challenge Data
+    const quizQuestions = [
+      { q: "What is the capital of Bangladesh?", opts: ["Dhaka", "Chittagong", "Sylhet", "Rajshahi"], ans: 0 },
+      { q: "Which river is the longest in Bangladesh?", opts: ["Meghna", "Padma", "Jamuna", "Karnafuli"], ans: 0 },
+      { q: "In which year did Bangladesh gain independence?", opts: ["1952", "1969", "1971", "1990"], ans: 2 },
+      { q: "What is the national animal of Bangladesh?", opts: ["Lion", "Royal Bengal Tiger", "Elephant", "Deer"], ans: 1 },
+      { q: "What is the currency of Bangladesh?", opts: ["Rupee", "Dollar", "Taka", "Riyal"], ans: 2 }
+    ];
+    let currentQuizStep = 0;
+    let currentQuizScore = 0;
+
+    const marketplaceProducts = [
+      { id: "p1", name: "VIP Verification Badge", price: "1200 Coins", img: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?w=300" },
+      { id: "p2", name: "Premium Golden Frame", price: "350 Coins", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=300" },
+      { id: "p3", name: "Post Boost 24 Hours", price: "600 Coins", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300" },
+      { id: "p4", name: "Custom Chat Theme", price: "250 Coins", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300" },
+      { id: "p5", name: "Animated Avatar Glow", price: "500 Coins", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300" },
+      { id: "p6", name: "Profile Cover Art Pro", price: "400 Coins", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=300" }
+    ];
+
+    function refreshIcons() {
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // -----------------------------------------------------------------
+    // AUTHENTICATION ENGINE
+    // -----------------------------------------------------------------
+    window.togglePasswordVisibility = function() {
+      const p = document.getElementById("auth-password");
+      const icon = document.getElementById("auth-eye-icon");
+      if (p.type === "password") {
+        p.type = "text";
+        icon.setAttribute("data-lucide", "eye-off");
+      } else {
+        p.type = "password";
+        icon.setAttribute("data-lucide", "eye");
+      }
+      refreshIcons();
+    };
+
+    window.toggleAuthMode = function() {
+      isRegisterMode = !isRegisterMode;
+      const title = document.getElementById("auth-title");
+      const subtitle = document.getElementById("auth-subtitle");
+      const nameGroup = document.getElementById("auth-name-group");
+      const forgotLink = document.getElementById("auth-forgot-link");
+      const btnText = document.getElementById("auth-btn-text");
+      const switchText = document.getElementById("auth-switch-text");
+      const switchBtn = document.getElementById("auth-switch-btn");
+
+      if (isRegisterMode) {
+        title.innerText = "Create Account";
+        subtitle.innerText = "Join SocialX real social network";
+        nameGroup.classList.remove("hidden");
+        forgotLink.classList.add("hidden");
+        btnText.innerText = "Create Account";
+        switchText.innerText = "Already have an account?";
+        switchBtn.innerText = "Sign In";
+      } else {
+        title.innerText = "Sign In";
+        subtitle.innerText = "To sign in to an account in the application, enter your email and password";
+        nameGroup.classList.add("hidden");
+        forgotLink.classList.remove("hidden");
+        btnText.innerText = "Sign In";
+        switchText.innerText = "Dont have an account yet?";
+        switchBtn.innerText = "Create Account";
+      }
+      refreshIcons();
+    };
+
+    window.handleForgotPassword = async function() {
+      const email = document.getElementById("auth-email").value.trim();
+      if (!email) return alert("Please enter your email first.");
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email sent!");
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+
+    window.handleRealAuthSubmit = async function() {
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value.trim();
+      const name = document.getElementById("auth-name").value.trim();
+
+      if (!email || !password) return alert("Please provide email and password.");
+
+      const btn = document.getElementById("auth-submit-btn");
+      btn.disabled = true;
+      btn.classList.add("opacity-70");
+
+      try {
+        if (isRegisterMode) {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          const defaultAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200";
+          const defaultCover = "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?w=1000";
+
+          await updateProfile(user, { displayName: name || email.split("@")[0], photoURL: defaultAvatar });
+
+          const newUserData = {
+            uid: user.uid,
+            name: name || email.split("@")[0],
+            email: email,
+            avatar: defaultAvatar,
+            cover: defaultCover,
+            bio: "",
+            location: "Bangladesh",
+            city: "Dhaka",
+            birthday: "2000-01-01",
+            relationship: "Single",
+            gender: "Female",
+            work: "",
+            education: "",
+            phone: "",
+            bdtBalance: 0,
+            coinsBalance: 1500,
+            online: true,
+            createdAt: Date.now()
+          };
+
+          await set(ref(db, `users/${user.uid}`), newUserData);
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove("opacity-70");
+      }
+    };
+
+    window.handleSignOut = async function() {
+      if (currentUser) {
+        await update(ref(db, `users/${currentUser.uid}`), { online: false });
+      }
+      await signOut(auth);
+      document.getElementById("auth-screen").classList.remove("hidden");
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("auth-screen").classList.add("hidden");
+        
+        const userRef = ref(db, `users/${user.uid}`);
+        await update(userRef, { online: true });
+        onDisconnect(userRef).update({ online: false });
+
+        onValue(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            currentUserData = snapshot.val();
+            updateOwnProfileUI(currentUserData);
+          }
+        });
+
+        initRealtimeDatabaseListeners();
+        renderMarketplaceProducts();
+        startMarketSliderAuto();
+        switchTab("feed");
+      } else {
+        currentUser = null;
+        currentUserData = null;
+        document.getElementById("auth-screen").classList.remove("hidden");
+      }
+    });
+
+    function updateOwnProfileUI(data) {
+      if (!data) return;
+      document.getElementById("feed-avatar-img").src = data.avatar || "";
+      document.getElementById("story-self-img").src = data.avatar || "";
+      document.getElementById("profile-avatar-display").src = data.avatar || "";
+      document.getElementById("profile-cover-display").src = data.cover || "";
+      document.getElementById("ep-avatar-img").src = data.avatar || "";
+      document.getElementById("ep-cover-img").src = data.cover || "";
+      document.getElementById("cp-avatar").src = data.avatar || "";
+      document.getElementById("cp-user-name").innerText = data.name || "User";
+      document.getElementById("profile-name-display").innerText = data.name || "User";
+      document.getElementById("profile-bio-display").innerText = data.bio || "No bio set";
+
+      document.getElementById("ep-field-bio").innerText = data.bio || "Not added";
+      document.getElementById("ep-field-location").innerText = data.location || "Not added";
+      document.getElementById("ep-field-birthday").innerText = data.birthday || "Not added";
+
+      // Wallet card info
+      document.getElementById("wallet-card-avatar").src = data.avatar || "";
+      document.getElementById("wallet-card-name").innerText = data.name || "User";
+      document.getElementById("wallet-bdt-balance").innerText = (data.bdtBalance || 0).toFixed(2);
+      document.getElementById("wallet-coins-balance").innerText = (data.coinsBalance || 0).toLocaleString();
+    }
+
+    // -----------------------------------------------------------------
+    // REALTIME DATABASE LISTENERS & SYNC
+    // -----------------------------------------------------------------
+    function initRealtimeDatabaseListeners() {
+      onValue(ref(db, "users"), (snapshot) => {
+        allUsersMap = snapshot.val() || {};
+        renderSuggestions();
+        renderActiveFriends();
+        renderYourFriends();
+        renderChatThreads();
+      });
+
+      const postsRef = query(ref(db, "posts"), limitToLast(40));
+      onValue(postsRef, (snapshot) => {
+        realPostsList = [];
+        snapshot.forEach(child => {
+          realPostsList.unshift({ id: child.key, ...child.val() });
+        });
+        renderRealtimeFeed();
+        if (currentUser) {
+          const myPosts = realPostsList.filter(p => p.authorId === currentUser.uid);
+          document.getElementById("my-posts-count").innerText = myPosts.length;
+        }
+      });
+
+      // Stories (24h Expiry Filter)
+      onValue(ref(db, "stories"), (snapshot) => {
+        groupedStoriesByUser = {};
+        const now = Date.now();
+        snapshot.forEach(child => {
+          const val = child.val();
+          if (val.expiresAt && val.expiresAt > now) {
+            if (!groupedStoriesByUser[val.authorId]) groupedStoriesByUser[val.authorId] = [];
+            groupedStoriesByUser[val.authorId].push({ id: child.key, ...val });
+          }
+        });
+        renderRealtimeStories();
+      });
+
+      if (currentUser) {
+        onValue(ref(db, `friendRequests/${currentUser.uid}`), (snapshot) => {
+          const requests = [];
+          snapshot.forEach(child => {
+            requests.push({ id: child.key, ...child.val() });
+          });
+          renderFriendRequests(requests);
+        });
+
+        onValue(ref(db, `friends/${currentUser.uid}`), (snapshot) => {
+          const friends = snapshot.val() || {};
+          document.getElementById("my-friends-count").innerText = Object.keys(friends).length;
+          renderYourFriends();
+          renderActiveFriends();
+          renderSuggestions();
+          renderChatThreads();
+        });
+
+        onValue(ref(db, `notifications/${currentUser.uid}`), (snapshot) => {
+          const notifs = [];
+          snapshot.forEach(child => {
+            notifs.unshift({ id: child.key, ...child.val() });
+          });
+          renderNotifications(notifs);
+        });
+
+        onValue(ref(db, `walletHistory/${currentUser.uid}`), (snapshot) => {
+          renderWalletHistory(snapshot.val() || {});
+        });
+      }
+    }
+
+    // -----------------------------------------------------------------
+    // 1. STORY SYSTEM (CREATE PHOTO/VIDEO & 24 HOURS EXPIRY)
+    // -----------------------------------------------------------------
+    window.handleStoryUpload = function(e) {
+      const file = e.target.files[0];
+      if (!file || !currentUser) return;
+
+      const mediaType = file.type.startsWith("video") ? "video" : "image";
+      const reader = new FileReader();
+
+      reader.onload = async function(evt) {
+        const mediaUrl = evt.target.result;
+        const storyData = {
+          authorId: currentUser.uid,
+          authorName: currentUserData?.name || "User",
+          avatar: currentUserData?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+          mediaType: mediaType,
+          mediaUrl: mediaUrl,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 Hours Auto Expire
+        };
+
+        try {
+          await push(ref(db, "stories"), storyData);
+          alert("🎉 Story uploaded successfully! Visible for 24 hours.");
+        } catch (err) {
+          alert("Failed to upload story: " + err.message);
+        }
+      };
+
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    };
+
+    function renderRealtimeStories() {
+      const container = document.getElementById("realtime-stories-container");
+      if (!container) return;
+      container.innerHTML = "";
+
+      Object.keys(groupedStoriesByUser).forEach(authorId => {
+        const stories = groupedStoriesByUser[authorId];
+        if (!stories || stories.length === 0) return;
+        const latest = stories[stories.length - 1];
+
+        let previewThumb = latest.mediaType === 'video' 
+          ? `<video class="w-full h-full object-cover" src="${latest.mediaUrl}"></video>` 
+          : `<img src="${latest.mediaUrl}" class="w-full h-full object-cover" />`;
+
+        container.insertAdjacentHTML('beforeend', `
+          <div onclick="openStoryViewer('${authorId}')" class="relative shrink-0 w-28 h-48 rounded-xl overflow-hidden shadow-3d-sm bg-black border border-lite-border cursor-pointer group hover:scale-[1.02] transition duration-200">
+            ${previewThumb}
+            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80"></div>
+            
+            <div class="absolute top-2 left-2 w-8 h-8 rounded-full p-[1.5px] bg-brand border border-white overflow-hidden shadow-md">
+              <img src="${latest.avatar}" class="w-full h-full rounded-full object-cover" />
+            </div>
+
+            <div class="absolute bottom-2 left-2 right-2 text-white">
+              <p class="text-[11px] font-bold truncate">${latest.authorName}</p>
+            </div>
+          </div>
+        `);
+      });
+      refreshIcons();
+    }
+
+    window.openStoryViewer = function(authorId) {
+      activeStoryAuthorId = authorId;
+      activeStoryIndex = 0;
+      loadActiveStorySlide();
+      document.getElementById("story-viewer-modal").classList.remove("hidden");
+      document.getElementById("story-viewer-modal").classList.add("flex");
+      refreshIcons();
+    };
+
+    function loadActiveStorySlide() {
+      if (storyAutoTimer) clearTimeout(storyAutoTimer);
+      const stories = groupedStoriesByUser[activeStoryAuthorId];
+      if (!stories || !stories[activeStoryIndex]) {
+        closeStoryViewer();
+        return;
+      }
+
+      const st = stories[activeStoryIndex];
+      document.getElementById("story-user-name").innerText = st.authorName;
+      document.getElementById("story-user-avatar").src = st.avatar;
+      document.getElementById("story-time-ago").innerText = formatTime(st.createdAt);
+
+      const pContainer = document.getElementById("story-progress-bars");
+      pContainer.innerHTML = "";
+      stories.forEach((_, idx) => {
+        pContainer.insertAdjacentHTML('beforeend', `
+          <div class="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+            <div class="h-full bg-white transition-all duration-300 ${idx === activeStoryIndex ? 'w-full' : idx < activeStoryIndex ? 'w-full' : 'w-0'}"></div>
+          </div>
+        `);
+      });
+
+      const imgEl = document.getElementById("story-main-img");
+      const vidEl = document.getElementById("story-main-video");
+
+      if (st.mediaType === "video") {
+        imgEl.classList.add("hidden");
+        vidEl.classList.remove("hidden");
+        vidEl.src = st.mediaUrl;
+        vidEl.currentTime = 0;
+        vidEl.play().catch(()=>{});
+        vidEl.onended = () => nextStorySlide();
+      } else {
+        vidEl.classList.add("hidden");
+        imgEl.classList.remove("hidden");
+        imgEl.src = st.mediaUrl;
+        storyAutoTimer = setTimeout(() => {
+          nextStorySlide();
+        }, 5000);
+      }
+    }
+
+    window.nextStorySlide = function() {
+      const stories = groupedStoriesByUser[activeStoryAuthorId];
+      if (stories && activeStoryIndex < stories.length - 1) {
+        activeStoryIndex++;
+        loadActiveStorySlide();
+      } else {
+        closeStoryViewer();
+      }
+    };
+
+    window.prevStorySlide = function() {
+      if (activeStoryIndex > 0) {
+        activeStoryIndex--;
+        loadActiveStorySlide();
+      }
+    };
+
+    window.closeStoryViewer = function() {
+      if (storyAutoTimer) clearTimeout(storyAutoTimer);
+      const vidEl = document.getElementById("story-main-video");
+      if (vidEl) vidEl.pause();
+      document.getElementById("story-viewer-modal").classList.add("hidden");
+      document.getElementById("story-viewer-modal").classList.remove("flex");
+    };
+
+    window.openStoryUserFullProfile = function() {
+      if (activeStoryAuthorId) {
+        closeStoryViewer();
+        openUserProfile(activeStoryAuthorId);
+      }
+    };
+
+    window.sendStoryReply = function() {
+      const input = document.getElementById("story-reply-input");
+      if (!input.value.trim()) return;
+      alert("Reply sent: " + input.value);
+      input.value = "";
+    };
+
+    window.reactToStory = function(emoji) {
+      alert(`Reacted ${emoji} to story!`);
+    };
+
+    // -----------------------------------------------------------------
+    // 2. FRIENDS HUB: SUGGESTIONS, ADD FRIEND, REQUESTS, YOUR/ACTIVE FRIENDS
+    // -----------------------------------------------------------------
+    async function renderSuggestions() {
+      const container = document.getElementById("suggestions-list");
+      if (!container || !currentUser) return;
+      container.innerHTML = "";
+
+      const friendsSnap = await get(ref(db, `friends/${currentUser.uid}`));
+      const myFriends = friendsSnap.val() || {};
+
+      const sentRequestsSnap = await get(ref(db, `sentRequests/${currentUser.uid}`));
+      const sentReqs = sentRequestsSnap.val() || {};
+
+      const availableUsers = Object.values(allUsersMap).filter(u => 
+        u.uid !== currentUser.uid && !myFriends[u.uid]
+      );
+
+      if (availableUsers.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-lite-muted py-6">No new suggestions right now.</p>`;
+        return;
+      }
+
+      availableUsers.forEach(u => {
+        const isSent = !!sentReqs[u.uid];
+        container.insertAdjacentHTML('beforeend', `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="openUserProfile('${u.uid}')">
+              <img src="${u.avatar}" class="w-12 h-12 rounded-full object-cover border border-lite-border" />
+              <div>
+                <h4 class="font-bold text-sm hover:underline">${u.name}</h4>
+                <p class="text-[11px] text-lite-muted">${u.location || 'SocialX User'}</p>
+              </div>
+            </div>
+            <div>
+              ${isSent 
+                ? `<button onclick="cancelFriendRequest('${u.uid}')" class="btn-3d px-3 py-1.5 rounded-xl bg-lite-border text-xs font-bold">Requested</button>`
+                : `<button onclick="sendFriendRequestFromSugg('${u.uid}')" class="btn-3d px-4 py-1.5 rounded-xl bg-brand text-white text-xs font-bold shadow-3d-btn">Add Friend</button>`
+              }
+            </div>
+          </div>
+        `);
+      });
+      refreshIcons();
+    }
+
+    window.sendFriendRequestFromSugg = async function(targetUid) {
+      if (!currentUser || targetUid === currentUser.uid) return;
+
+      try {
+        const reqData = {
+          senderId: currentUser.uid,
+          senderName: currentUserData?.name || "User",
+          senderAvatar: currentUserData?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+          createdAt: Date.now()
+        };
+
+        await set(ref(db, `friendRequests/${targetUid}/${currentUser.uid}`), reqData);
+        await set(ref(db, `sentRequests/${currentUser.uid}/${targetUid}`), true);
+
+        await push(ref(db, `notifications/${targetUid}`), {
+          senderId: currentUser.uid,
+          senderName: currentUserData?.name || "User",
+          text: "sent you a friend request.",
+          type: "friend_request",
+          createdAt: Date.now()
+        });
+
+        alert("✓ Friend request sent successfully!");
+        renderSuggestions();
+        if (activeViewedUserId === targetUid) openUserProfile(targetUid);
+      } catch (err) {
+        alert("Failed to send friend request: " + err.message);
+      }
+    };
+
+    window.cancelFriendRequest = async function(targetUid) {
+      if (!currentUser) return;
+      await remove(ref(db, `friendRequests/${targetUid}/${currentUser.uid}`));
+      await remove(ref(db, `sentRequests/${currentUser.uid}/${targetUid}`));
+      renderSuggestions();
+    };
+
+    function renderFriendRequests(requests) {
+      const hubContainer = document.getElementById("hub-requests-container");
+      const allContainer = document.getElementById("all-requests-container");
+      const reqCount = requests.length;
+
+      document.getElementById("req-hub-count").innerText = `(${reqCount})`;
+      document.getElementById("req-seeall-count").innerText = `(${reqCount})`;
+
+      const badge = document.getElementById("friends-tab-badge");
+      if (reqCount > 0) {
+        badge.innerText = reqCount;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+
+      if (reqCount === 0) {
+        if (hubContainer) hubContainer.innerHTML = `<p class="text-center text-xs text-lite-muted py-4">No pending friend requests.</p>`;
+        if (allContainer) allContainer.innerHTML = `<p class="text-center text-xs text-lite-muted py-6">No pending friend requests.</p>`;
+        return;
+      }
+
+      const generateHtml = (r) => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="openUserProfile('${r.senderId}')">
+            <img src="${r.senderAvatar}" class="w-12 h-12 rounded-full object-cover border border-lite-border" />
+            <div>
+              <h4 class="font-bold text-sm hover:underline">${r.senderName}</h4>
+              <span class="text-[10px] text-lite-muted">${formatTime(r.createdAt)}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="acceptFriendRequest('${r.senderId}')" class="btn-3d px-3.5 py-1.5 bg-brand text-white font-bold text-xs rounded-xl shadow-3d-btn">Confirm</button>
+            <button onclick="rejectFriendRequest('${r.senderId}')" class="btn-3d px-3.5 py-1.5 bg-lite-border text-lite-text font-bold text-xs rounded-xl">Delete</button>
+          </div>
+        </div>
+      `;
+
+      if (hubContainer) hubContainer.innerHTML = requests.slice(0, 3).map(generateHtml).join("");
+      if (allContainer) allContainer.innerHTML = requests.map(generateHtml).join("");
+      refreshIcons();
+    }
+
+    window.acceptFriendRequest = async function(senderId) {
+      if (!currentUser) return;
+      try {
+        await set(ref(db, `friends/${currentUser.uid}/${senderId}`), true);
+        await set(ref(db, `friends/${senderId}/${currentUser.uid}`), true);
+
+        await remove(ref(db, `friendRequests/${currentUser.uid}/${senderId}`));
+        await remove(ref(db, `sentRequests/${senderId}/${currentUser.uid}`));
+
+        await push(ref(db, `notifications/${senderId}`), {
+          senderId: currentUser.uid,
+          senderName: currentUserData?.name || "Someone",
+          text: "accepted your friend request.",
+          type: "friend_accept",
+          createdAt: Date.now()
+        });
+
+        alert("🎉 You are now friends!");
+      } catch (err) {
+        alert("Error accepting request: " + err.message);
+      }
+    };
+
+    window.rejectFriendRequest = async function(senderId) {
+      if (!currentUser) return;
+      await remove(ref(db, `friendRequests/${currentUser.uid}/${senderId}`));
+      await remove(ref(db, `sentRequests/${senderId}/${currentUser.uid}`));
+    };
+
+    async function renderYourFriends() {
+      const list = document.getElementById("your-friends-list");
+      if (!list || !currentUser) return;
+      list.innerHTML = "";
+
+      const friendsSnap = await get(ref(db, `friends/${currentUser.uid}`));
+      const myFriends = friendsSnap.val() || {};
+      const friendUids = Object.keys(myFriends);
+
+      if (friendUids.length === 0) {
+        list.innerHTML = `<p class="text-center text-xs text-lite-muted py-8">You have not added any friends yet.</p>`;
+        return;
+      }
+
+      friendUids.forEach(fUid => {
+        const u = allUsersMap[fUid];
+        if (u) {
+          list.insertAdjacentHTML('beforeend', `
+            <div class="p-3 flex items-center justify-between hover:bg-lite-bg/50 transition">
+              <div class="flex items-center gap-3 cursor-pointer" onclick="openUserProfile('${u.uid}')">
+                <div class="relative">
+                  <img src="${u.avatar}" class="w-12 h-12 rounded-full object-cover border border-lite-border" />
+                  ${u.online ? '<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>' : ''}
+                </div>
+                <div>
+                  <h4 class="font-bold text-sm hover:underline">${u.name}</h4>
+                  <p class="text-xs text-lite-muted">${u.location || 'Bangladesh'}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openDedicatedChat('${u.uid}')" class="btn-3d px-3 py-1.5 bg-brand text-white font-bold text-xs rounded-xl shadow-3d-btn">Message</button>
+                <button onclick="unfriendUser('${u.uid}')" class="btn-3d px-2.5 py-1.5 text-xs text-red-600 bg-red-500/10 rounded-xl font-bold">Unfriend</button>
+              </div>
+            </div>
+          `);
+        }
+      });
+      refreshIcons();
+    }
+
+    window.unfriendUser = async function(targetUid) {
+      if (!confirm("Are you sure you want to unfriend this user?")) return;
+      await remove(ref(db, `friends/${currentUser.uid}/${targetUid}`));
+      await remove(ref(db, `friends/${targetUid}/${currentUser.uid}`));
+      renderYourFriends();
+      renderActiveFriends();
+    };
+
+    async function renderActiveFriends() {
+      const list = document.getElementById("active-friends-list");
+      if (!list || !currentUser) return;
+      list.innerHTML = "";
+
+      const friendsSnap = await get(ref(db, `friends/${currentUser.uid}`));
+      const myFriends = friendsSnap.val() || {};
+      const friendUids = Object.keys(myFriends);
+
+      const activeList = friendUids.map(uid => allUsersMap[uid]).filter(u => u && u.online);
+      document.getElementById("active-friends-pill-count").innerText = `${activeList.length} active`;
+
+      if (activeList.length === 0) {
+        list.innerHTML = `<p class="text-center text-xs text-lite-muted py-8">No friends are currently active.</p>`;
+        return;
+      }
+
+      activeList.forEach(u => {
+        list.insertAdjacentHTML('beforeend', `
+          <div class="p-3 flex items-center justify-between hover:bg-lite-bg/50 transition">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="openUserProfile('${u.uid}')">
+              <div class="relative">
+                <img src="${u.avatar}" class="w-12 h-12 rounded-full object-cover border border-lite-border" />
+                <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
+              </div>
+              <div>
+                <h4 class="font-bold text-sm hover:underline">${u.name}</h4>
+                <p class="text-xs text-green-600 font-semibold">Active now</p>
+              </div>
+            </div>
+            <button onclick="openDedicatedChat('${u.uid}')" class="btn-3d px-4 py-1.5 bg-brand text-white font-bold text-xs rounded-xl shadow-3d-btn">Chat</button>
+          </div>
+        `);
+      });
+      refreshIcons();
+    }
+
+    // -----------------------------------------------------------------
+    // 3. SOCIALX 3D WALLET SYSTEM (CONVERT, WITHDRAW, HISTORY)
+    // -----------------------------------------------------------------
+    window.switchWalletTab = function(tabName) {
+      document.getElementById("wallet-sec-earning").classList.add("hidden");
+      document.getElementById("wallet-sec-withdraw").classList.add("hidden");
+      document.getElementById("wallet-sec-history").classList.add("hidden");
+
+      document.querySelectorAll(".w-tab-btn").forEach(btn => {
+        btn.className = "w-tab-btn py-2 px-3 rounded-xl bg-lite-card border border-lite-border text-lite-text font-bold text-xs";
+      });
+
+      const activeBtn = document.getElementById(`wallet-tab-${tabName}`);
+      if (activeBtn) {
+        activeBtn.className = "w-tab-btn py-2 px-3 rounded-xl bg-brand text-white shadow-3d-btn font-bold text-xs";
+      }
+
+      const activeSec = document.getElementById(`wallet-sec-${tabName}`);
+      if (activeSec) activeSec.classList.remove("hidden");
+      refreshIcons();
+    };
+
+    window.selectWithdrawMethod = function(method) {
+      currentWithdrawMethod = method;
+      document.querySelectorAll(".wm-btn").forEach(btn => {
+        btn.className = "wm-btn py-3 px-2 rounded-2xl border border-lite-border bg-lite-bg text-lite-text font-black text-xs text-center shadow-sm";
+      });
+      const activeBtn = document.getElementById(`wm-${method}`);
+      if (activeBtn) {
+        activeBtn.className = "wm-btn py-3 px-2 rounded-2xl border border-pink-500 bg-pink-500/10 text-pink-600 font-black text-xs text-center shadow-sm";
+      }
+    };
+
+    window.handleCoinsConvert = async function() {
+      const input = document.getElementById("convert-coins-input");
+      const coinsToConvert = parseInt(input.value);
+
+      if (isNaN(coinsToConvert) || coinsToConvert < 500) {
+        return alert("⚠️ Minimum conversion amount is 500 Coins!");
+      }
+
+      const currentCoins = currentUserData?.coinsBalance || 0;
+      if (coinsToConvert > currentCoins) {
+        return alert("⚠️ You don't have enough Coins to convert!");
+      }
+
+      // Conversion rate: 1,000 Coins = 7.50 BDT
+      const bdtAmount = parseFloat(((coinsToConvert / 1000) * 7.50).toFixed(2));
+
+      try {
+        await runTransaction(ref(db, `users/${currentUser.uid}/coinsBalance`), c => (c || 0) - coinsToConvert);
+        await runTransaction(ref(db, `users/${currentUser.uid}/bdtBalance`), b => (b || 0) + bdtAmount);
+
+        // Record to History
+        await push(ref(db, `walletHistory/${currentUser.uid}`), {
+          type: "Converted Coins to BDT",
+          amount: `+৳ ${bdtAmount} BDT`,
+          detail: `Converted ${coinsToConvert} Coins`,
+          status: "Success",
+          createdAt: Date.now()
+        });
+
+        input.value = "";
+        alert(`🎉 Successfully converted ${coinsToConvert} Coins to ৳ ${bdtAmount} BDT!`);
+      } catch (err) {
+        alert("Conversion failed: " + err.message);
+      }
+    };
+
+    window.handleWithdrawSubmit = async function() {
+      const amountInput = document.getElementById("withdraw-amount");
+      const numberInput = document.getElementById("withdraw-number");
+      const typeSelect = document.getElementById("withdraw-type");
+
+      const amount = parseFloat(amountInput.value);
+      const number = numberInput.value.trim();
+      const accType = typeSelect.value;
+
+      if (!number || number.length < 11) {
+        return alert("⚠️ Please enter a valid 11-digit mobile number!");
+      }
+
+      const minAmount = accType === "Personal" ? 150 : 500;
+      if (isNaN(amount) || amount < minAmount) {
+        return alert(`⚠️ Minimum withdrawal amount for ${accType} is ${minAmount} BDT!`);
+      }
+
+      const currentBalance = currentUserData?.bdtBalance || 0;
+      if (amount > currentBalance) {
+        return alert("⚠️ Insufficient BDT Balance for withdrawal!");
+      }
+
+      try {
+        await runTransaction(ref(db, `users/${currentUser.uid}/bdtBalance`), b => (b || 0) - amount);
+
+        await push(ref(db, `walletHistory/${currentUser.uid}`), {
+          type: `Withdraw (${currentWithdrawMethod})`,
+          amount: `-৳ ${amount.toFixed(2)} BDT`,
+          detail: `${accType} (${number})`,
+          status: "Pending",
+          createdAt: Date.now()
+        });
+
+        amountInput.value = "";
+        numberInput.value = "";
+        alert(`🎉 Withdraw request of ৳ ${amount} BDT via ${currentWithdrawMethod} submitted successfully!`);
+        switchWalletTab("history");
+      } catch (err) {
+        alert("Withdraw submission failed: " + err.message);
+      }
+    };
+
+    function renderWalletHistory(historyObj) {
+      const list = document.getElementById("wallet-history-list");
+      if (!list) return;
+      list.innerHTML = "";
+
+      const records = Object.values(historyObj);
+      if (records.length === 0) {
+        list.innerHTML = `<p class="text-center text-lite-muted py-8">No transactions yet.</p>`;
+        return;
+      }
+
+      records.reverse().forEach(r => {
+        const isPositive = r.amount.startsWith("+");
+        list.insertAdjacentHTML('beforeend', `
+          <div class="py-2.5 flex items-center justify-between">
+            <div>
+              <h5 class="font-bold text-xs text-lite-text">${r.type}</h5>
+              <p class="text-[10px] text-lite-muted">${r.detail} • ${formatTime(r.createdAt)}</p>
+            </div>
+            <div class="text-right">
+              <span class="font-black text-xs ${isPositive ? 'text-emerald-600' : 'text-rose-600'}">${r.amount}</span>
+              <span class="block text-[9px] font-bold ${r.status === 'Success' ? 'text-emerald-500' : 'text-amber-500'}">${r.status}</span>
+            </div>
+          </div>
+        `);
+      });
+      refreshIcons();
+    }
+
+    // -----------------------------------------------------------------
+    // 4. PROFILE FIELD EDITOR & PHOTOS
+    // -----------------------------------------------------------------
+    window.openFieldEditor = function(fieldName, dbKey, inputType) {
+      currentEditingDbKey = dbKey;
+      document.getElementById("fe-title").innerText = `Edit ${fieldName}`;
+      const c = document.getElementById("fe-input-container");
+      c.innerHTML = `
+        <label class="text-xs font-bold text-lite-muted">${fieldName}</label>
+        <input type="${inputType}" id="fe-dynamic-input" value="${currentUserData?.[dbKey] || ''}" class="w-full text-xs p-3 rounded-xl bg-lite-bg border border-lite-border outline-none font-bold" />
+      `;
+      document.getElementById("field-editor-modal").classList.remove("hidden");
+      document.getElementById("field-editor-modal").classList.add("flex");
+      refreshIcons();
+    };
+
+    window.closeFieldEditor = function() {
+      document.getElementById("field-editor-modal").classList.add("hidden");
+      document.getElementById("field-editor-modal").classList.remove("flex");
+    };
+
+    window.saveFieldEditorValue = async function() {
+      const val = document.getElementById("fe-dynamic-input").value.trim();
+      if (!currentUser || !currentEditingDbKey) return;
+      await update(ref(db, `users/${currentUser.uid}`), { [currentEditingDbKey]: val });
+      closeFieldEditor();
+    };
+
+    window.uploadProfilePhoto = function(e, type) {
+      const file = e.target.files[0];
+      if (!file || !currentUser) return;
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        const updateObj = type === "avatar" ? { avatar: evt.target.result } : { cover: evt.target.result };
+        await update(ref(db, `users/${currentUser.uid}`), updateObj);
+        alert(`✓ ${type === 'avatar' ? 'Profile picture' : 'Cover photo'} updated!`);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // -----------------------------------------------------------------
+    // 5. NOTIFICATIONS RENDER
+    // -----------------------------------------------------------------
+    function renderNotifications(notifs) {
+      const container = document.getElementById("notifications-list-container");
+      const badge = document.getElementById("notif-badge-count");
+      if (!container) return;
+
+      if (notifs.length > 0 && badge) {
+        badge.innerText = notifs.length;
+        badge.classList.remove("hidden");
+      } else if (badge) {
+        badge.classList.add("hidden");
+      }
+
+      if (notifs.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-xs text-lite-muted">No notifications yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      notifs.forEach(n => {
+        container.insertAdjacentHTML('beforeend', `
+          <div class="py-3 px-1 flex items-start gap-3 hover:bg-lite-bg/40 transition">
+            <div class="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 text-xs">
+              <p><b>${n.senderName}</b> ${n.text}</p>
+              <span class="text-[10px] text-lite-muted">${formatTime(n.createdAt)}</span>
+            </div>
+          </div>
+        `);
+      });
+      refreshIcons();
+    }
+
+    // -----------------------------------------------------------------
+    // REALTIME FEED & REACTIONS
+    // -----------------------------------------------------------------
+    function renderRealtimeFeed() {
+      const stream = document.getElementById("posts-stream");
+      if (!stream) return;
+      stream.innerHTML = "";
+
+      if (realPostsList.length === 0) {
+        stream.innerHTML = `
+          <div class="bg-lite-card dark:bg-dark-card p-8 text-center rounded-xl border border-lite-border space-y-2">
+            <p class="text-sm font-bold">No posts in feed yet</p>
+            <p class="text-xs text-lite-muted">Be the first to publish a photo, video or status!</p>
+          </div>
+        `;
+        return;
+      }
+
+      realPostsList.forEach(post => {
+        let mediaMarkup = "";
+        if (post.mediaType === "video" && post.mediaUrl) {
+          mediaMarkup = `<div class="w-full bg-black flex items-center justify-center max-h-[500px]"><video controls playsinline class="w-full max-h-[500px]" src="${post.mediaUrl}"></video></div>`;
+        } else if (post.mediaUrl) {
+          mediaMarkup = `<img src="${post.mediaUrl}" class="w-full max-h-[500px] object-contain bg-black/5" />`;
+        }
+
+        const isLikedByMe = currentUser && post.likes && post.likes[currentUser.uid];
+
+        stream.insertAdjacentHTML('beforeend', `
+          <article class="bg-lite-card dark:bg-dark-card shadow-3d-card sm:rounded-xl border-y sm:border border-lite-border overflow-hidden" id="post-card-${post.id}">
+            <div class="p-3 pb-2 flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <img onclick="openUserProfile('${post.authorId}')" src="${post.avatar}" class="w-10 h-10 rounded-full object-cover border border-brand cursor-pointer" />
+                <div>
+                  <h4 onclick="openUserProfile('${post.authorId}')" class="font-bold text-[14px] cursor-pointer hover:underline">${post.authorName}</h4>
+                  <div class="flex items-center gap-1.5 text-[11px] text-lite-muted">
+                    <span>${formatTime(post.createdAt)}</span>
+                    <span>•</span>
+                    <span>👁️ ${post.viewsCount || 1} views</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            ${post.text ? `<div class="px-3 pb-2 text-[14px]">${post.text}</div>` : ''}
+            ${mediaMarkup}
+
+            <div class="px-3 py-2 flex items-center justify-between text-xs text-lite-muted border-b border-lite-border/50">
+              <div class="flex items-center gap-1">
+                <span>❤️👍😂</span>
+                <span>${post.likesCount || 0}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span onclick="toggleCommentSection('${post.id}')" class="cursor-pointer hover:underline">${post.commentsCount || 0} comments</span>
+                <span>•</span>
+                <span>${post.sharesCount || 0} shares</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="relative grid grid-cols-3 px-1 py-0.5 text-xs font-bold text-lite-muted">
+              <div class="group/react relative">
+                <button onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '👍')" class="btn-3d w-full flex items-center justify-center gap-1.5 py-2 hover:bg-lite-bg rounded-lg ${isLikedByMe ? 'text-brand' : ''}">
+                  <span>${isLikedByMe ? '❤️' : '👍'}</span> Like
+                </button>
+
+                <div class="reaction-popover hidden group-hover/react:flex absolute -top-12 left-2 bg-white dark:bg-dark-card px-2.5 py-1.5 rounded-full shadow-2xl border border-lite-border gap-2 z-30">
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '👍')" class="hover:scale-130 transition cursor-pointer text-base">👍</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '❤️')" class="hover:scale-130 transition cursor-pointer text-base">❤️</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '😂')" class="hover:scale-130 transition cursor-pointer text-base">😂</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '🤣')" class="hover:scale-130 transition cursor-pointer text-base">🤣</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '😅')" class="hover:scale-130 transition cursor-pointer text-base">😅</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '😇')" class="hover:scale-130 transition cursor-pointer text-base">😇</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '😛')" class="hover:scale-130 transition cursor-pointer text-base">😛</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '🫠')" class="hover:scale-130 transition cursor-pointer text-base">🫠</span>
+                  <span onclick="triggerMultiReaction('${post.id}', '${post.authorId}', '👌')" class="hover:scale-130 transition cursor-pointer text-base">👌</span>
+                </div>
+              </div>
+
+              <button onclick="toggleCommentSection('${post.id}')" class="btn-3d flex items-center justify-center gap-1.5 py-2 hover:bg-lite-bg rounded-lg">
+                <i data-lucide="message-square" class="w-4 h-4"></i> Comment
+              </button>
+
+              <button onclick="sharePostUrl('${post.id}')" class="btn-3d flex items-center justify-center gap-1.5 py-2 hover:bg-lite-bg rounded-lg">
+                <i data-lucide="share-2" class="w-4 h-4"></i> Share
+              </button>
+            </div>
+
+            <!-- Comments & Replies -->
+            <div id="comment-sec-${post.id}" class="hidden p-3 bg-lite-bg/50 dark:bg-dark-border/10 border-t border-lite-border/50 space-y-3">
+              <div id="comments-list-${post.id}" class="space-y-2 text-xs"></div>
+
+              <div class="flex gap-2">
+                <input type="text" id="comment-inp-${post.id}" placeholder="Write a comment..." class="flex-1 text-xs px-3.5 py-2 rounded-full bg-lite-card dark:bg-dark-card border border-lite-border outline-none" onkeydown="if(event.key==='Enter') submitComment('${post.id}', '${post.authorId}')" />
+                <button onclick="submitComment('${post.id}', '${post.authorId}')" class="btn-3d px-3.5 py-1.5 bg-brand text-white font-bold text-xs rounded-full shadow-3d-btn">Post</button>
+              </div>
+            </div>
+
+          </article>
+        `);
+      });
+      refreshIcons();
+    }
+
+    window.triggerMultiReaction = async function(postId, authorId, reactionEmoji) {
+      if (!currentUser) return;
+      if (authorId === currentUser.uid) {
+        return alert("⚠️ আপনি নিজের পোস্টে রিয়েক্ট দিতে পারবেন না!");
+      }
+
+      const postLikesRef = ref(db, `posts/${postId}/likes/${currentUser.uid}`);
+      const snap = await get(postLikesRef);
+
+      if (snap.exists()) {
+        await remove(postLikesRef);
+        await runTransaction(ref(db, `posts/${postId}/likesCount`), c => (c || 1) - 1);
+      } else {
+        await set(postLikesRef, reactionEmoji);
+        await runTransaction(ref(db, `posts/${postId}/likesCount`), c => (c || 0) + 1);
+        run15SecondAdCountdown(authorId, "like", postId);
+      }
+    };
+
+    window.toggleCommentSection = function(postId) {
+      const sec = document.getElementById(`comment-sec-${postId}`);
+      sec.classList.toggle("hidden");
+      if (!sec.classList.contains("hidden")) {
+        loadComments(postId);
+      }
+    };
+
+    function loadComments(postId) {
+      onValue(ref(db, `comments/${postId}`), (snapshot) => {
+        const list = document.getElementById(`comments-list-${postId}`);
+        if (!list) return;
+        list.innerHTML = "";
+        snapshot.forEach(child => {
+          const c = child.val();
+          list.insertAdjacentHTML('beforeend', `
+            <div class="p-2 rounded-xl bg-lite-card dark:bg-dark-card border border-lite-border shadow-3d-sm space-y-1">
+              <div class="flex items-center gap-1.5">
+                <b class="text-brand font-bold cursor-pointer hover:underline" onclick="openUserProfile('${c.authorId}')">${c.authorName}</b>
+                <span class="text-[10px] text-lite-muted">${formatTime(c.createdAt)}</span>
+              </div>
+              <p>${c.text}</p>
+              <button onclick="replyToCommentPrompt('${postId}', '${child.key}', '${c.authorName}')" class="text-[10px] text-brand font-bold hover:underline">Reply</button>
+              <div class="pl-3 pt-1 space-y-1 text-[11px] border-l-2 border-brand/30">
+                ${(c.replies ? Object.values(c.replies).map(r => `<div><b>${r.authorName}:</b> ${r.text}</div>`).join('') : '')}
+              </div>
+            </div>
+          `);
+        });
+      });
+    }
+
+    window.submitComment = async function(postId, authorId) {
+      const inp = document.getElementById(`comment-inp-${postId}`);
+      const text = inp.value.trim();
+      if (!text || !currentUser) return;
+
+      const commentData = {
+        authorId: currentUser.uid,
+        authorName: currentUserData?.name || "User",
+        text: text,
+        createdAt: Date.now()
+      };
+
+      await push(ref(db, `comments/${postId}`), commentData);
+      await runTransaction(ref(db, `posts/${postId}/commentsCount`), c => (c || 0) + 1);
+      inp.value = "";
+
+      if (authorId !== currentUser.uid) {
+        run15SecondAdCountdown(authorId, "comment", postId);
+      }
+    };
+
+    window.replyToCommentPrompt = async function(postId, commentId, authorName) {
+      const replyText = prompt(`Reply to ${authorName}:`);
+      if (!replyText || !replyText.trim() || !currentUser) return;
+
+      const replyData = {
+        authorName: currentUserData?.name || "User",
+        text: replyText.trim(),
+        createdAt: Date.now()
+      };
+
+      await push(ref(db, `comments/${postId}/${commentId}/replies`), replyData);
+      alert("✓ Reply posted!");
+    };
+
+    function run15SecondAdCountdown(postAuthorId, actionType, postId) {
+      const modal = document.getElementById("ad-timer-modal");
+      const secondsSpan = document.getElementById("ad-countdown-seconds");
+      document.getElementById("ad-reward-desc").innerText = `Watch for 15s to claim your ${actionType} reward Coins!`;
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+
+      let remaining = 15;
+      secondsSpan.innerText = remaining;
+
+      try {
+        if (window.show_9955574) window.show_9955574();
+      } catch (e) {}
+
+      const timer = setInterval(async () => {
+        remaining--;
+        secondsSpan.innerText = remaining;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+
+          const userReward = Math.floor(Math.random() * 4) + 2; 
+          const authorReward = Math.max(1, Math.round(userReward * 0.5)); 
+
+          await runTransaction(ref(db, `users/${currentUser.uid}/coinsBalance`), c => (c || 0) + userReward);
+
+          if (postAuthorId && postAuthorId !== currentUser.uid) {
+            await runTransaction(ref(db, `users/${postAuthorId}/coinsBalance`), c => (c || 0) + authorReward);
+
+            await push(ref(db, `notifications/${postAuthorId}`), {
+              senderId: currentUser.uid,
+              senderName: currentUserData?.name || "Someone",
+              text: `${actionType === 'like' ? 'reacted to' : 'commented on'} your post! (+${authorReward} Coins earned)`,
+              type: actionType,
+              postId: postId,
+              createdAt: Date.now()
+            });
+          }
+
+          alert(`🎉 15s Ad Completed! You earned +${userReward} Coins. Post author received +${authorReward} Coins.`);
+        }
+      }, 1000);
+    }
+
+    window.start15SecondAdTask = function(taskTitle, rewardCoins) {
+      const modal = document.getElementById("ad-timer-modal");
+      const secondsSpan = document.getElementById("ad-countdown-seconds");
+      document.getElementById("ad-reward-desc").innerText = `Watch 15s sponsored ad to earn +${rewardCoins} Coins!`;
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+
+      let remaining = 15;
+      secondsSpan.innerText = remaining;
+
+      const timer = setInterval(async () => {
+        remaining--;
+        secondsSpan.innerText = remaining;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+
+          await runTransaction(ref(db, `users/${currentUser.uid}/coinsBalance`), c => (c || 0) + rewardCoins);
+          alert(`🎉 Ad Completed! +${rewardCoins} Coins added to your Wallet!`);
+        }
+      }, 1000);
+    };
+
+    // 5-Quiz Challenge
+    window.start5QuizChallenge = function() {
+      currentQuizStep = 0;
+      currentQuizScore = 0;
+      showQuizStep();
+      document.getElementById("quiz-game-modal").classList.remove("hidden");
+      document.getElementById("quiz-game-modal").classList.add("flex");
+      refreshIcons();
+    };
+
+    function showQuizStep() {
+      const q = quizQuestions[currentQuizStep];
+      document.getElementById("quiz-step-badge").innerText = `Question ${currentQuizStep + 1}/5`;
+      document.getElementById("quiz-question-text").innerText = q.q;
+
+      const c = document.getElementById("quiz-options-container");
+      c.innerHTML = "";
+
+      q.opts.forEach((opt, idx) => {
+        c.insertAdjacentHTML('beforeend', `
+          <button onclick="handleQuizAnswer(${idx})" class="btn-3d w-full text-left p-3 rounded-2xl bg-lite-bg dark:bg-dark-border/40 border border-lite-border font-bold hover:border-brand transition">
+            ${String.fromCharCode(65 + idx)}) ${opt}
+          </button>
+        `);
+      });
+    }
+
+    window.handleQuizAnswer = function(chosenIdx) {
+      const q = quizQuestions[currentQuizStep];
+      if (chosenIdx === q.ans) currentQuizScore++;
+
+      currentQuizStep++;
+      if (currentQuizStep < 5) {
+        showQuizStep();
+      } else {
+        closeQuizModal();
+        if (currentQuizScore === 5) {
+          alert("🎉 Congratulations! All 5/5 answers were correct! Watching 15-second ad to unlock your +5 Coins reward.");
+          start15SecondAdTask("5-Quiz Reward", 5);
+        } else {
+          alert(`You scored ${currentQuizScore}/5. Answer all 5 questions correctly to claim 5 Coins! Try again.`);
+        }
+      }
+    };
+
+    window.closeQuizModal = function() {
+      document.getElementById("quiz-game-modal").classList.add("hidden");
+      document.getElementById("quiz-game-modal").classList.remove("flex");
+    };
+
+    window.sharePostUrl = async function(postId) {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+      navigator.clipboard?.writeText(shareUrl);
+      if (currentUser) {
+        await runTransaction(ref(db, `posts/${postId}/sharesCount`), c => (c || 0) + 1);
+      }
+      alert(`✓ Post Link Copied!\n${shareUrl}`);
+    };
+
+    // -----------------------------------------------------------------
+    // CREATE POST PERSISTENCE
+    // -----------------------------------------------------------------
+    window.handleCpFileSelect = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      openFullCreatePostScreen();
+
+      const reader = new FileReader();
+      const prevBox = document.getElementById("cp-preview-container");
+      const imgPrev = document.getElementById("cp-image-preview");
+      const vidPrev = document.getElementById("cp-video-preview");
+
+      cpSelectedFileType = file.type.startsWith("video") ? "video" : "image";
+
+      reader.onload = function(evt) {
+        cpSelectedDataUrl = evt.target.result;
+        prevBox.classList.remove("hidden");
+        if (cpSelectedFileType === "image") {
+          imgPrev.src = cpSelectedDataUrl;
+          imgPrev.classList.remove("hidden");
+          vidPrev.classList.add("hidden");
+        } else {
+          vidPrev.src = cpSelectedDataUrl;
+          vidPrev.classList.remove("hidden");
+          imgPrev.classList.add("hidden");
+        }
+      };
+      reader.readAsDataURL(file);
+      refreshIcons();
+    };
+
+    window.publishRealtimePost = async function() {
+      const text = document.getElementById("cp-caption-input").value.trim();
+      if (!text && !cpSelectedDataUrl) return alert("Please write something or choose photo/video!");
+      if (!currentUser) return alert("Please sign in first.");
+
+      const btn = document.getElementById("main-post-publish-btn");
+      const btnText = document.getElementById("post-btn-text");
+      btn.disabled = true;
+      btnText.innerText = "Publishing...";
+
+      const authorName = currentUserData?.name || "User";
+      const authorAvatar = currentUserData?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200";
+
+      const newPostData = {
+        authorId: currentUser.uid,
+        authorName: authorName,
+        avatar: authorAvatar,
+        text: text,
+        mediaType: cpSelectedFileType,
+        mediaUrl: cpSelectedDataUrl,
+        createdAt: Date.now(),
+        likesCount: 0,
+        commentsCount: 0,
+        sharesCount: 0,
+        viewsCount: 1
+      };
+
+      try {
+        await push(ref(db, "posts"), newPostData);
+        document.getElementById("cp-caption-input").value = "";
+        clearCpMedia();
+        document.getElementById("full-create-post-page").classList.add("hidden");
+        switchTab("feed");
+      } catch (err) {
+        alert("Firebase Post Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.innerText = "POST";
+      }
+    };
+
+    // -----------------------------------------------------------------
+    // MARKETPLACE SLIDER & PRODUCTS
+    // -----------------------------------------------------------------
+    function startMarketSliderAuto() {
+      setInterval(() => {
+        nextMarketSlide();
+      }, 4000);
+    }
+
+    window.nextMarketSlide = function() {
+      currentMarketSlide = (currentMarketSlide + 1) % totalMarketSlides;
+      updateMarketSlider();
+    };
+
+    window.prevMarketSlide = function() {
+      currentMarketSlide = (currentMarketSlide - 1 + totalMarketSlides) % totalMarketSlides;
+      updateMarketSlider();
+    };
+
+    function updateMarketSlider() {
+      const track = document.getElementById("market-slider-track");
+      if (track) {
+        track.style.transform = `translateX(-${currentMarketSlide * 100}%)`;
+      }
+    }
+
+    function renderMarketplaceProducts() {
+      const c = document.getElementById("marketplace-products-grid");
+      if (!c) return;
+      c.innerHTML = "";
+      marketplaceProducts.forEach(p => {
+        c.insertAdjacentHTML('beforeend', `
+          <div onclick="openProductBuyModal('${p.id}')" class="p-2 rounded-2xl bg-lite-bg dark:bg-dark-border/20 border border-lite-border shadow-3d-sm cursor-pointer hover:scale-[1.02] transition flex flex-col justify-between">
+            <img src="${p.img}" class="w-full aspect-square rounded-xl object-cover mb-1.5 shadow" />
+            <div>
+              <h4 class="font-bold text-xs truncate">${p.name}</h4>
+              <span class="text-[11px] text-brand font-black block">${p.price}</span>
+            </div>
+            <button class="btn-3d w-full mt-1.5 py-1 bg-brand text-white font-bold text-[10px] rounded-lg shadow-3d-btn">Buy Now</button>
+          </div>
+        `);
+      });
+      refreshIcons();
+    }
+
+    window.openMarketTaskModal = function(type) {
+      const title = document.getElementById("mt-modal-title");
+      const content = document.getElementById("mt-modal-content");
+      const actionBtn = document.getElementById("mt-modal-action-btn");
+
+      if (type === "daily") {
+        title.innerText = "Daily Check-in Bonus";
+        content.innerHTML = `
+          <p>Claim your <b>50 PSP Coins</b> daily login reward today!</p>
+          <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold">Reward: +50 Coins (Credited to Wallet)</div>
+        `;
+        actionBtn.onclick = async () => {
+          await runTransaction(ref(db, `users/${currentUser.uid}/coinsBalance`), c => (c || 0) + 50);
+          closeMarketTaskModal();
+          alert("🎉 +50 Daily Bonus Coins added to your Wallet!");
+        };
+      } else if (type === "spin") {
+        title.innerText = "Lucky Wheel Spin";
+        content.innerHTML = `<p>Spin the lucky wheel and win up to <b>100 Coins</b>!</p>`;
+        actionBtn.onclick = () => { closeMarketTaskModal(); start15SecondAdTask('Lucky Spin', 20); };
+      } else {
+        title.innerText = "Special Tasks & Offers";
+        content.innerHTML = `<p>Complete tasks, install apps or participate in lucky wheel to earn coins!</p>`;
+        actionBtn.onclick = () => { closeMarketTaskModal(); start15SecondAdTask('Special Task', 50); };
+      }
+
+      document.getElementById("market-task-modal").classList.remove("hidden");
+      document.getElementById("market-task-modal").classList.add("flex");
+      refreshIcons();
+    };
+
+    window.closeMarketTaskModal = function() {
+      document.getElementById("market-task-modal").classList.add("hidden");
+      document.getElementById("market-task-modal").classList.remove("flex");
+    };
+
+    window.openProductBuyModal = function(productId) {
+      const p = marketplaceProducts.find(x => x.id === productId);
+      if (!p) return;
+      if (confirm(`Do you want to purchase "${p.name}" for ${p.price}?`)) {
+        alert(`✓ Purchase successful! ${p.name} activated on your profile.`);
+      }
+    };
+
+    // -----------------------------------------------------------------
+    // MESSENGER & AUDIO/VIDEO CALLS
+    // -----------------------------------------------------------------
+    function renderChatThreads() {
+      const container = document.getElementById("chat-threads-list");
+      if (!container || !currentUser) return;
+      container.innerHTML = "";
+
+      get(ref(db, `friends/${currentUser.uid}`)).then(snap => {
+        if (!snap.exists() || Object.keys(snap.val()).length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-12 px-4 space-y-2">
+              <p class="text-sm font-bold text-lite-text">No friends to message yet</p>
+              <p class="text-xs text-lite-muted">Only confirmed friends can chat with each other.</p>
+              <button onclick="openSubView('suggestions')" class="btn-3d px-4 py-2 bg-brand text-white font-bold text-xs rounded-xl shadow-3d-btn mt-2">Find Friends</button>
+            </div>
+          `;
+          return;
+        }
+
+        Object.keys(snap.val()).forEach(fUid => {
+          const u = allUsersMap[fUid];
+          if (u) {
+            container.insertAdjacentHTML('beforeend', `
+              <div onclick="openDedicatedChat('${fUid}')" class="px-4 py-3 flex items-center gap-3 hover:bg-lite-bg/60 cursor-pointer transition">
+                <div class="relative shrink-0" onclick="event.stopPropagation(); openUserProfile('${fUid}')">
+                  <img src="${u.avatar}" class="w-11 h-11 rounded-full object-cover border border-lite-border" />
+                  ${u.online ? '<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>' : ''}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-bold text-[14px] truncate">${u.name}</h4>
+                  <p class="text-xs text-lite-muted truncate">Tap to open conversation</p>
+                </div>
+              </div>
+            `);
+          }
+        });
+        refreshIcons();
+      });
+    }
+
+    window.openDedicatedChat = function(partnerUid) {
+      activeChatUserId = partnerUid;
+      const user = allUsersMap[partnerUid];
+      if (!user || !currentUser) return;
+
+      document.getElementById("chat-room-name").innerText = user.name;
+      document.getElementById("chat-room-avatar").src = user.avatar;
+
+      const chatId = [currentUser.uid, partnerUid].sort().join("_");
+      onValue(ref(db, `messages/${chatId}`), (snapshot) => {
+        const box = document.getElementById("chat-room-messages");
+        box.innerHTML = "";
+        snapshot.forEach(child => {
+          const m = child.val();
+          let content = m.text;
+          if (m.type === "image") content = `<img src="${m.mediaUrl}" class="rounded-lg max-h-48 object-cover shadow" />`;
+          if (m.type === "video") content = `<video controls src="${m.mediaUrl}" class="rounded-lg max-h-48"></video>`;
+
+          if (m.senderId === currentUser.uid) {
+            box.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-start justify-end"><div class="bg-brand text-white p-2.5 rounded-2xl rounded-tr-none max-w-[75%] shadow-3d-btn">${content}</div></div>`);
+          } else {
+            box.insertAdjacentHTML('beforeend', `<div class="flex gap-2 items-start"><div class="bg-lite-card dark:bg-dark-card border border-lite-border p-2.5 rounded-2xl rounded-tl-none max-w-[75%] shadow-sm">${content}</div></div>`);
+          }
+        });
+        box.scrollTop = box.scrollHeight;
+      });
+
+      openSubView("chat-room");
+    };
+
+    window.sendRoomMessage = async function() {
+      const inp = document.getElementById("chat-room-input");
+      const text = inp.value.trim();
+      if (!text || !activeChatUserId || !currentUser) return;
+
+      const chatId = [currentUser.uid, activeChatUserId].sort().join("_");
+      await push(ref(db, `messages/${chatId}`), {
+        senderId: currentUser.uid,
+        text: text,
+        type: "text",
+        createdAt: Date.now()
+      });
+      inp.value = "";
+    };
+
+    window.sendChatMediaFile = function(e) {
+      const file = e.target.files[0];
+      if (!file || !activeChatUserId || !currentUser) return;
+      const r = new FileReader();
+      r.onload = async function(evt) {
+        const chatId = [currentUser.uid, activeChatUserId].sort().join("_");
+        await push(ref(db, `messages/${chatId}`), {
+          senderId: currentUser.uid,
+          type: file.type.startsWith("video") ? "video" : "image",
+          mediaUrl: evt.target.result,
+          createdAt: Date.now()
+        });
+      };
+      r.readAsDataURL(file);
+    };
+
+    window.triggerCall = function(callType) {
+      const user = allUsersMap[activeChatUserId];
+      if (!user) return;
+      document.getElementById("call-user-name").innerText = `${callType === 'video' ? 'Video' : 'Audio'} Call: ${user.name}`;
+      document.getElementById("call-user-avatar").src = user.avatar;
+      document.getElementById("call-modal").classList.remove("hidden");
+      document.getElementById("call-modal").classList.add("flex");
+      refreshIcons();
+    };
+
+    window.endCall = function() {
+      document.getElementById("call-modal").classList.add("hidden");
+      document.getElementById("call-modal").classList.remove("flex");
+    };
+
+    // -----------------------------------------------------------------
+    // PROFILE TABS & DETAILS
+    // -----------------------------------------------------------------
+    window.filterProfileTab = function(tabType) {
+      document.querySelectorAll(".prof-tab-btn").forEach(btn => {
+        btn.className = "prof-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition";
+      });
+      const activeBtn = document.getElementById(`prof-tab-${tabType}`);
+      if (activeBtn) activeBtn.className = "prof-tab-btn px-4 py-1.5 rounded-full bg-brand text-white shadow-3d-btn transition";
+
+      const contentBox = document.getElementById("profile-tab-content");
+      if (!contentBox || !currentUser) return;
+      contentBox.innerHTML = "";
+
+      if (tabType === "about") {
+        const d = currentUserData || {};
+        contentBox.innerHTML = `
+          <div class="bg-lite-card dark:bg-dark-card rounded-2xl p-4 border border-lite-border shadow-3d-card space-y-3 text-xs">
+            <h3 class="font-bold text-sm border-b pb-2">About Information</h3>
+            <div><b>Bio:</b> ${d.bio || 'Not added'}</div>
+            <div><b>Location:</b> ${d.location || 'Not added'}</div>
+            <div><b>Home City:</b> ${d.city || 'Not added'}</div>
+            <div><b>Work:</b> ${d.work || 'Not added'}</div>
+            <div><b>Education:</b> ${d.education || 'Not added'}</div>
+            <div><b>Birthday:</b> ${d.birthday || 'Not added'}</div>
+            <div><b>Relationship:</b> ${d.relationship || 'Single'}</div>
+          </div>
+        `;
+        return;
+      } else if (tabType === "settings") {
+        contentBox.innerHTML = `
+          <div class="bg-lite-card dark:bg-dark-card rounded-2xl p-4 border border-lite-border shadow-3d-card space-y-2 text-xs font-bold">
+            <button onclick="openSubView('wallet')" class="w-full text-left p-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 flex items-center justify-between"><span class="flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4 text-amber-600"></i> SocialX 3D Wallet</span><span class="text-amber-600 font-black">৳ ${(currentUserData?.bdtBalance || 0).toFixed(2)}</span></button>
+            <button onclick="openSubView('edit-profile')" class="w-full text-left p-3 rounded-xl hover:bg-lite-bg flex items-center gap-2 border border-lite-border"><i data-lucide="user" class="w-4 h-4 text-brand"></i> Edit Profile Information</button>
+            <button onclick="handleSignOut()" class="w-full text-left p-3 rounded-xl text-red-600 hover:bg-red-50 flex items-center gap-2 border border-red-200 mt-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out Account</button>
+          </div>
+        `;
+        refreshIcons();
+        return;
+      }
+
+      const myPosts = realPostsList.filter(p => p.authorId === currentUser.uid);
+      let filtered = myPosts;
+      if (tabType === "photos") filtered = myPosts.filter(p => p.mediaType === "image");
+      if (tabType === "videos") filtered = myPosts.filter(p => p.mediaType === "video");
+
+      if (filtered.length === 0) {
+        contentBox.innerHTML = `<div class="text-center py-8 text-xs text-lite-muted">No ${tabType} posts yet.</div>`;
+        return;
+      }
+
+      let gridHtml = `<div class="grid grid-cols-3 gap-1.5">`;
+      filtered.forEach(p => {
+        gridHtml += `
+          <div onclick="openPostDetails('${p.id}')" class="relative aspect-square rounded-lg overflow-hidden border border-lite-border bg-black cursor-pointer">
+            <img src="${p.mediaUrl || p.avatar}" class="w-full h-full object-cover" />
+          </div>
+        `;
+      });
+      gridHtml += `</div>`;
+      contentBox.innerHTML = gridHtml;
+    };
+
+    window.openPostDetails = function(postId) {
+      const p = realPostsList.find(x => x.id === postId);
+      if (!p) return;
+
+      const body = document.getElementById("post-details-card-body");
+      let mediaMarkup = "";
+      if (p.mediaType === "video" && p.mediaUrl) mediaMarkup = `<video controls class="w-full max-h-96" src="${p.mediaUrl}"></video>`;
+      else if (p.mediaUrl) mediaMarkup = `<img src="${p.mediaUrl}" class="w-full max-h-96 object-contain bg-black/5" />`;
+
+      body.innerHTML = `
+        <div class="p-3 pb-2 flex items-center gap-2.5">
+          <img src="${p.avatar}" class="w-10 h-10 rounded-full object-cover border border-brand cursor-pointer" onclick="openUserProfile('${p.authorId}')" />
+          <div><h4 class="font-bold text-[14px] cursor-pointer hover:underline" onclick="openUserProfile('${p.authorId}')">${p.authorName}</h4><span class="text-[11px] text-lite-muted">${formatTime(p.createdAt)}</span></div>
+        </div>
+        <div class="px-3 pb-2 text-[14px]">${p.text || ''}</div>
+        ${mediaMarkup}
+        <div class="px-3 py-2 flex items-center justify-between text-xs text-lite-muted border-b border-lite-border/50">
+          <span>❤️👍 ${p.likesCount || 0}</span><span>${p.commentsCount || 0} comments</span>
+        </div>
+      `;
+      openSubView("post-details");
+    };
+
+    // -----------------------------------------------------------------
+    // SEARCH & GLOBAL USER PROFILES
+    // -----------------------------------------------------------------
+    window.openSearchModal = () => {
+      document.getElementById("search-modal").classList.remove("hidden");
+      document.getElementById("search-modal").classList.add("flex");
+      document.getElementById("live-search-input").focus();
+      refreshIcons();
+    };
+
+    window.handleLiveSearch = (q) => {
+      const query = q.toLowerCase().trim();
+      const res = document.getElementById("search-results-list");
+      if (!query) {
+        res.innerHTML = `<p class="text-center text-lite-muted py-6">Type a name to search...</p>`;
+        return;
+      }
+
+      const matches = Object.values(allUsersMap).filter(u => u && u.name && u.name.toLowerCase().includes(query));
+      if (matches.length === 0) {
+        res.innerHTML = `<p class="text-center text-lite-muted py-6">No users found.</p>`;
+        return;
+      }
+
+      res.innerHTML = "";
+      matches.forEach(u => {
+        res.insertAdjacentHTML('beforeend', `
+          <div onclick="document.getElementById('search-modal').classList.add('hidden'); openUserProfile('${u.uid}')" class="py-2.5 px-2 flex items-center justify-between hover:bg-lite-bg rounded-xl cursor-pointer">
+            <div class="flex items-center gap-3"><img src="${u.avatar}" class="w-10 h-10 rounded-full object-cover" /><h4 class="font-bold text-sm">${u.name}</h4></div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-lite-muted"></i>
+          </div>
+        `);
+      });
+      refreshIcons();
+    };
+
+    window.openUserProfile = async (uid) => {
+      if (currentUser && uid === currentUser.uid) return switchTab("profile");
+      const snap = await get(ref(db, `users/${uid}`));
+      if (!snap.exists()) return;
+      const user = snap.val();
+      activeViewedUserId = uid;
+
+      document.getElementById("up-header-name").innerText = user.name;
+      document.getElementById("up-name-display").innerText = user.name;
+      document.getElementById("up-avatar-display").src = user.avatar;
+      document.getElementById("up-cover-display").src = user.cover || "";
+      document.getElementById("up-bio-display").innerText = user.bio || "";
+
+      let isFriend = false;
+      if (currentUser) {
+        const fSnap = await get(ref(db, `friends/${currentUser.uid}/${uid}`));
+        isFriend = fSnap.exists();
+      }
+
+      const btnC = document.getElementById("up-actions-container");
+      btnC.innerHTML = isFriend ? `
+        <button class="btn-3d flex-1 py-2 bg-lite-bg text-brand font-bold text-xs rounded-lg border border-lite-border">Friends ✓</button>
+        <button onclick="openDedicatedChat('${uid}')" class="btn-3d flex-1 py-2 bg-brand text-white font-bold text-xs rounded-lg shadow-3d-btn">Message</button>
+      ` : `
+        <button onclick="sendFriendRequestFromSugg('${uid}')" class="btn-3d w-full py-2 bg-brand text-white font-bold text-xs rounded-lg shadow-3d-btn">Add Friend</button>
+      `;
+
+      filterUserProfileTab("all");
+      openSubView("user-profile");
+    };
+
+    window.filterUserProfileTab = function(tabType) {
+      document.querySelectorAll(".up-tab-btn").forEach(btn => {
+        btn.className = "up-tab-btn px-4 py-1.5 rounded-full bg-lite-card border border-lite-border text-lite-text shadow-3d-sm transition";
+      });
+      const activeBtn = document.getElementById(`up-tab-${tabType}`);
+      if (activeBtn) activeBtn.className = "up-tab-btn px-4 py-1.5 rounded-full bg-brand text-white shadow-3d-btn transition";
+
+      const content = document.getElementById("up-tab-content");
+      if (!content || !activeViewedUserId) return;
+      content.innerHTML = "";
+
+      const userPosts = realPostsList.filter(p => p.authorId === activeViewedUserId);
+      if (tabType === "about") {
+        const u = allUsersMap[activeViewedUserId] || {};
+        content.innerHTML = `<div class="bg-lite-card dark:bg-dark-card rounded-xl p-4 border border-lite-border text-xs space-y-2"><b>Bio:</b> ${u.bio || 'None'}<br><b>Location:</b> ${u.location || 'Bangladesh'}</div>`;
+      } else {
+        if (userPosts.length === 0) {
+          content.innerHTML = `<div class="text-center py-8 text-xs text-lite-muted">No posts.</div>`;
+          return;
+        }
+        let grid = `<div class="grid grid-cols-3 gap-1.5">`;
+        userPosts.forEach(p => {
+          grid += `<div onclick="openPostDetails('${p.id}')" class="relative aspect-square rounded-lg overflow-hidden border border-lite-border bg-black cursor-pointer"><img src="${p.mediaUrl || p.avatar}" class="w-full h-full object-cover" /></div>`;
+        });
+        grid += `</div>`;
+        content.innerHTML = grid;
+      }
+    };
+
+    // Navigation Subviews
+    window.switchTab = function(t) {
+      document.querySelectorAll(".tab-view").forEach(el => el.classList.add("hidden"));
+      document.querySelectorAll(".tab-btn").forEach(el => {
+        el.classList.remove("text-brand", "border-brand");
+        el.classList.add("text-lite-muted", "border-transparent");
+      });
+
+      const v = document.getElementById(`view-${t}`);
+      const b = document.getElementById(`tab-btn-${t}`);
+      if (v) v.classList.remove("hidden");
+      if (b) {
+        b.classList.add("text-brand", "border-brand");
+        b.classList.remove("text-lite-muted", "border-transparent");
+      }
+
+      const topBar = document.getElementById("home-top-bar");
+      if (t === "feed") topBar.classList.remove("hidden");
+      else topBar.classList.add("hidden");
+
+      if (t === "profile") filterProfileTab("all");
+      if (t === "friends") renderSuggestions();
+      if (t === "chat") renderChatThreads();
+      refreshIcons();
+    };
+
+    window.openSubView = function(viewId) {
+      document.querySelectorAll(".tab-view").forEach(el => el.classList.add("hidden"));
+      const target = document.getElementById(`view-${viewId}`);
+      if (target) target.classList.remove("hidden");
+      document.getElementById("home-top-bar").classList.add("hidden");
+
+      if (viewId === "suggestions") renderSuggestions();
+      if (viewId === "active-friends") renderActiveFriends();
+      if (viewId === "your-friends") renderYourFriends();
+      refreshIcons();
+    };
+
+    window.openPostTypeDropdown = (e) => {
+      e.stopPropagation();
+      document.getElementById("post-type-dropdown").classList.remove("hidden");
+      document.getElementById("post-type-dropdown").classList.add("flex");
+      refreshIcons();
+    };
+    window.closePostTypeDropdown = () => document.getElementById("post-type-dropdown").classList.add("hidden");
+
+    window.triggerDirectMediaPost = (type) => {
+      closePostTypeDropdown();
+      const fi = document.getElementById("cp-file-input");
+      fi.accept = type === 'video' ? 'video/*' : 'image/*';
+      fi.click();
+    };
+
+    window.openFullCreatePostScreen = () => {
+      closePostTypeDropdown();
+      document.getElementById("full-create-post-page").classList.remove("hidden");
+      document.getElementById("full-create-post-page").classList.add("flex");
+      refreshIcons();
+    };
+
+    window.clearCpMedia = () => {
+      cpSelectedFileType = "none";
+      cpSelectedDataUrl = "";
+      document.getElementById("cp-preview-container").classList.add("hidden");
+    };
+
+    function formatTime(timestamp) {
+      if (!timestamp) return "Just now";
+      const diff = Math.floor((Date.now() - timestamp) / 1000);
+      if (diff < 60) return "Just now";
+      if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+      return `${Math.floor(diff / 86400)}d`;
+    }
+
+    refreshIcons();
+  </script>
+</body>
+</html>
